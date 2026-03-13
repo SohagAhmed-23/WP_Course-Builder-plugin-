@@ -61,20 +61,7 @@ $teachers   = \CB\Core\CPT_Teachers::get_formatted();
                             <input type="text" id="cb-subtitle" name="subtitle" class="cb-input" placeholder="A short tagline that sells the course">
                         </div>
 
-                        <div class="cb-field" style="margin-bottom:0">
-                            <label class="cb-label" for="cb-youtube-url">
-                                <svg class="cb-label-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
-                                <?php _e( 'Course Explainer Video', 'course-builder' ); ?>
-                            </label>
-                            <div class="cb-youtube-input">
-                                <span class="cb-youtube-input__prefix">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EF3E26"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff"/></svg>
-                                </span>
-                                <input type="url" id="cb-youtube-url" name="youtube_url" class="cb-input cb-youtube-input__field"
-                                    placeholder="https://www.youtube.com/watch?v=…">
-                            </div>
-                            <p class="cb-hint"><?php _e( 'Paste a YouTube link to preview this course. Leave blank if not applicable.', 'course-builder' ); ?></p>
-                        </div>
+
                     </div>
                 </div>
 
@@ -177,11 +164,17 @@ $teachers   = \CB\Core\CPT_Teachers::get_formatted();
                                 <?php _e( 'Saving…', 'course-builder' ); ?>
                             </span>
                         </button>
+                        <!-- Preview button — always rendered, URL set via JS after save -->
+                        <div id="cb-preview-wrap" style="<?php echo $is_edit ? '' : 'display:none;'; ?>margin-top:10px">
+                            <a href="<?php echo $is_edit ? esc_url( get_permalink( $edit_id ) ) : '#'; ?>"
+                               target="_blank"
+                               id="cb-preview-btn"
+                               class="cb-preview-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                <?php _e( 'Preview Course Page', 'course-builder' ); ?>
+                            </a>
+                        </div>
                         <?php if ( $is_edit ) : ?>
-                        <a href="<?php echo get_permalink( $edit_id ); ?>" target="_blank" class="cb-btn cb-btn--ghost cb-btn--full" style="margin-top:10px">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            <?php _e( 'Preview Course Page', 'course-builder' ); ?>
-                        </a>
                         <a href="<?php echo admin_url( 'admin.php?page=course-builder-add' ); ?>" class="cb-btn cb-btn--ghost cb-btn--full" style="margin-top:8px">
                             <?php _e( '+ Add Another Course', 'course-builder' ); ?>
                         </a>

@@ -1,569 +1,697 @@
 /* ============================================================
-   Course Builder — Frontend Course Overview Page
-   Brand: #244092 (primary) | #EF3E26 (accent)
+   Course Builder — Single Course Page
+   Matches: Pedago Kids reference design
+   Brand: Primary #244092 | Accent #EF3E26
+   Font: Poppins
    ============================================================ */
 
-:root {
-  --cbo-primary:      #244092;
-  --cbo-primary-dk:   #162860;
-  --cbo-accent:       #EF3E26;
-  --cbo-accent-dk:    #c92f18;
-  --cbo-text:         #0F172A;
-  --cbo-text2:        #334155;
-  --cbo-muted:        #64748B;
-  --cbo-border:       #E2E8F0;
-  --cbo-bg:           #F1F5F9;
-  --cbo-card:         #FFFFFF;
-  --cbo-r:            12px;
-  --cbo-r-sm:         8px;
-  --cbo-shadow:       0 2px 12px rgba(36,64,146,.08), 0 1px 3px rgba(0,0,0,.05);
-  --cbo-shadow-md:    0 8px 28px rgba(36,64,146,.12), 0 2px 8px rgba(0,0,0,.05);
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ---------- CSS VARIABLES ---------- */
+.cbo {
+  --primary:       #244092;
+  --primary-light: #3355b8;
+  --primary-pale:  rgba(36,64,146,0.08);
+  --accent:        #EF3E26;
+  --accent-hover:  #d43520;
+  --bg:            #f4f6fb;
+  --card-bg:       #ffffff;
+  --text-dark:     #1a2340;
+  --text-body:     #3d4a6a;
+  --text-muted:    #7a88aa;
+  --border:        rgba(36,64,146,0.12);
+  --shadow-inset:  inset 0 0 15px rgba(36,64,146,0.20);
+  --shadow-card:   0 4px 24px rgba(36,64,146,0.10);
+  --shadow-hover:  0 12px 36px rgba(36,64,146,0.18);
+  --radius:        16px;
+  --radius-sm:     8px;
+  --radius-pill:   999px;
+  --transition:    0.3s ease;
+  --font:          'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ---------- RESET ---------- */
+.cbo *, .cbo *::before, .cbo *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+}
+.cbo { font-family: var(--font); background: var(--bg); color: var(--text-body);
+       font-size: 15px; line-height: 1.65; }
+.cbo img { display: block; width: 100%; object-fit: cover; }
+.cbo a { text-decoration: none; color: inherit; }
+.cbo ul { list-style: none; }
 
-.cbo-page {
-  background: var(--cbo-bg);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: var(--cbo-text);
-  min-height: 100vh;
+/* ---------- CONTAINER ---------- */
+.cbo__container {
+  width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px;
 }
 
-/* ── Container ────────────────────────────────────────────────────────────── */
-.cbo-container {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 0 24px;
+/* ============================================================
+   COURSE HERO
+   ============================================================ */
+.cbo__hero {
+  background: var(--bg);
+  padding: 32px 0 26px;
+  /* border-bottom: 1px solid rgba(36,64,146,0.10); */
 }
+.cbo__hero .cbo__container { padding-top: 0; }
 
-/* ── Hero ─────────────────────────────────────────────────────────────────── */
-.cbo-hero {
-  background: #fff;
-  border-bottom: 1px solid var(--cbo-border);
-  padding: 40px 0 32px;
+.cbo__breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-muted); margin-bottom: 14px;
 }
+.cbo__breadcrumb a { color: var(--primary); }
+.cbo__breadcrumb a:hover { text-decoration: underline; }
+.cbo__breadcrumb svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-.cbo-hero__breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--cbo-muted);
-  margin-bottom: 14px;
-}
-.cbo-hero__breadcrumb a { color: var(--cbo-primary); text-decoration: none; }
-.cbo-hero__breadcrumb a:hover { text-decoration: underline; }
-.cbo-hero__breadcrumb svg { width: 14px; height: 14px; }
-
-.cbo-hero__title {
-  font-size: clamp(26px, 4vw, 38px);
+.cbo__course-title {
+  font-size: 3rem;
   font-weight: 800;
-  color: var(--cbo-primary);
-  letter-spacing: -.5px;
+  color: var(--primary);
   line-height: 1.2;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+  padding-top: 10px;
+}
+.cbo__course-tagline {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.cbo__hero-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.cbo__meta-pill {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
 }
 
-.cbo-hero__subtitle {
-  font-size: 16px;
-  color: var(--cbo-muted);
-  line-height: 1.6;
-  max-width: 640px;
-  margin-bottom: 20px;
-}
-
-/* Stats bar */
-.cbo-stats-bar {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-.cbo-stat {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--cbo-text2);
-}
-.cbo-stat svg {
-  width: 16px; height: 16px;
-  stroke: var(--cbo-primary);
-  flex-shrink: 0;
-}
-
-/* ── Layout ───────────────────────────────────────────────────────────────── */
-.cbo-layout {
+/* ============================================================
+   MAIN TWO-COLUMN LAYOUT
+   ============================================================ */
+.cbo__layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 24px;
-  padding-top: 28px;
-  padding-bottom: 60px;
+  grid-template-columns: 65% 35%;
+  gap: 28px;
+  padding-top: 36px;
+  padding-bottom: 52px;
   align-items: start;
 }
+@media (max-width:900px) { .cbo__layout { grid-template-columns: 1fr; } }
 
-@media (max-width: 980px) {
-  .cbo-layout { grid-template-columns: 1fr; }
-  .cbo-sidebar { order: -1; }
+/* ============================================================
+   CARD BASE
+   ============================================================ */
+.cbo__card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-inset), var(--shadow-card);
+  border: 1px solid var(--border);
+  transition: transform var(--transition), box-shadow var(--transition);
+  margin-bottom: 24px;
 }
-
-/* ── Section Cards ────────────────────────────────────────────────────────── */
-.cbo-section {
-  background: var(--cbo-card);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r);
-  padding: 26px 28px;
-  margin-bottom: 18px;
-  box-shadow: var(--cbo-shadow);
-}
-
-.cbo-section__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 2px solid var(--cbo-border);
+.cbo__card:last-child { margin-bottom: 0; }
+.cbo__card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-inset), var(--shadow-hover);
 }
 
-.cbo-section__head h2 {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--cbo-primary);
-  letter-spacing: -.2px;
-}
-
-.cbo-section__icon {
-  width: 38px; height: 38px;
-  border-radius: var(--cbo-r-sm);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.cbo-section__icon svg { width: 18px; height: 18px; }
-
-.cbo-section__icon--red    { background: #FFF0EE; }
-.cbo-section__icon--red svg { stroke: var(--cbo-accent); }
-.cbo-section__icon--blue   { background: #EEF2FF; }
-.cbo-section__icon--blue svg { stroke: var(--cbo-primary); }
-.cbo-section__icon--teal   { background: #E6F5F4; }
-.cbo-section__icon--teal svg { stroke: #0E7C72; }
-.cbo-section__icon--yellow { background: #FFFBEB; }
-.cbo-section__icon--yellow svg { stroke: #B45309; }
-.cbo-section__icon--gold   { background: #FFF8E6; }
-.cbo-section__icon--gold svg { stroke: #D97706; fill: #D97706; }
-.cbo-section__icon--purple { background: #F5F0FF; }
-.cbo-section__icon--purple svg { stroke: #7C3AED; }
-
-/* ── Bullet Points ────────────────────────────────────────────────────────── */
-.cbo-points {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.cbo-points li {
-  font-size: 14.5px;
-  color: var(--cbo-text2);
-  line-height: 1.6;
-  padding-left: 22px;
-  position: relative;
-}
-.cbo-points li::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 8px;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--cbo-primary);
-}
-
-/* Flame bullets for Programme Overview */
-.cbo-points--flame li::before {
-  content: '🔥';
-  background: none;
-  font-size: 12px;
-  top: 2px; left: -2px;
-}
-
-/* ── Course Units Grid ────────────────────────────────────────────────────── */
-.cbo-units-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-@media (max-width: 640px) { .cbo-units-grid { grid-template-columns: 1fr; } }
-
-.cbo-unit-card {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: var(--cbo-bg);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r-sm);
-  padding: 14px;
-  transition: box-shadow .15s ease, border-color .15s ease;
-}
-.cbo-unit-card:hover {
-  border-color: var(--cbo-primary);
-  box-shadow: 0 4px 14px rgba(36,64,146,.1);
-}
-.cbo-unit-card__num {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--cbo-primary), #2e50b0);
-  color: #fff;
-  font-size: 12px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.cbo-unit-card__body strong { display: block; font-size: 13.5px; font-weight: 700; color: var(--cbo-text); margin-bottom: 3px; }
-.cbo-unit-card__body p { font-size: 12px; color: var(--cbo-muted); line-height: 1.5; margin: 0; }
-
-/* ── Features Grid ────────────────────────────────────────────────────────── */
-.cbo-features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-@media (max-width: 640px) { .cbo-features-grid { grid-template-columns: 1fr; } }
-
-.cbo-feature-card {
-  padding: 16px;
-  background: var(--cbo-bg);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r-sm);
-}
-.cbo-feature-card__icon {
-  width: 38px; height: 38px;
-  border-radius: var(--cbo-r-sm);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 10px;
-}
-.cbo-feature-card__icon svg { width: 18px; height: 18px; }
-.cbo-feature-card strong { display: block; font-size: 13.5px; font-weight: 700; color: var(--cbo-text); margin-bottom: 4px; }
-.cbo-feature-card p { font-size: 12.5px; color: var(--cbo-muted); line-height: 1.5; margin: 0; }
-
-/* ── Instructors ──────────────────────────────────────────────────────────── */
-.cbo-instructors {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.cbo-instructor {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  width: 100px;
-}
-.cbo-instructor__photo {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--cbo-border);
-}
-.cbo-instructor__initials {
-  background: linear-gradient(135deg, var(--cbo-primary), #2e50b0);
-  color: #fff;
-  font-size: 20px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  border: none;
-}
-.cbo-instructor__name { font-size: 13px; font-weight: 700; color: var(--cbo-text); line-height: 1.3; }
-.cbo-instructor__desig { font-size: 11.5px; color: var(--cbo-muted); }
-
-/* ── Sidebar ──────────────────────────────────────────────────────────────── */
-.cbo-sidebar { display: flex; flex-direction: column; gap: 16px; }
-
-/* ── Enroll Card ──────────────────────────────────────────────────────────── */
-.cbo-enroll-card {
-  background: var(--cbo-card);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r);
-  padding: 22px;
-  box-shadow: var(--cbo-shadow-md);
-}
-.cbo-enroll-card h3 {
-  font-size: 16px; font-weight: 800;
-  color: var(--cbo-text);
-  margin-bottom: 14px;
-}
-
-/* Variation tabs */
-.cbo-var-tabs {
-  display: flex;
-  border-radius: var(--cbo-r-sm);
-  background: var(--cbo-bg);
-  border: 1px solid var(--cbo-border);
-  padding: 3px;
-  margin-bottom: 14px;
-  gap: 3px;
-}
-.cbo-var-tab {
-  flex: 1;
-  padding: 7px 10px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  font-size: 13px; font-weight: 700;
-  color: var(--cbo-muted);
-  cursor: pointer;
-  transition: all .15s ease;
-  font-family: inherit;
-}
-.cbo-var-tab.active {
-  background: var(--cbo-primary);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(36,64,146,.25);
-}
-
-/* Price */
-.cbo-price {
-  font-size: 28px; font-weight: 800;
-  color: var(--cbo-primary);
-  letter-spacing: -.5px;
-  margin-bottom: 14px;
-  display: flex; align-items: baseline; gap: 4px;
-}
-.cbo-price__period {
-  font-size: 14px; font-weight: 500;
-  color: var(--cbo-muted);
-}
-.cbo-price--free {
-  font-size: 22px;
-  color: #059669;
-  background: #D1FAE5;
-  padding: 6px 14px;
-  border-radius: 6px;
-  display: inline-flex;
-  margin-bottom: 14px;
-}
-
-/* Enroll button */
-.cbo-enroll-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 13px 20px;
-  background: linear-gradient(135deg, var(--cbo-accent), var(--cbo-accent-dk));
-  color: #fff;
-  border: none;
-  border-radius: var(--cbo-r-sm);
-  font-size: 15px; font-weight: 800;
-  cursor: pointer;
-  text-decoration: none;
-  font-family: inherit;
-  letter-spacing: -.1px;
-  transition: all .15s ease;
-  box-shadow: 0 4px 14px rgba(239,62,38,.3);
-}
-.cbo-enroll-btn:hover {
-  background: linear-gradient(135deg, var(--cbo-accent-dk), #a82510);
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(239,62,38,.4);
-}
-.cbo-enroll-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-.cbo-enroll-btn--outline {
-  background: transparent;
-  border: 2px solid var(--cbo-primary);
-  color: var(--cbo-primary);
-  box-shadow: none;
-}
-.cbo-enroll-btn--outline:hover {
-  background: var(--cbo-primary);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(36,64,146,.25);
-}
-
-/* Perks list */
-.cbo-enroll-perks {
-  list-style: none;
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.cbo-enroll-perks li {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13.5px; color: var(--cbo-text2);
-}
-.cbo-enroll-perks svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-/* ── Sidebar Cards ────────────────────────────────────────────────────────── */
-.cbo-sidebar-card {
-  background: var(--cbo-card);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r);
-  padding: 18px 20px;
-  box-shadow: var(--cbo-shadow);
-}
-.cbo-sidebar-card__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px; font-weight: 800;
-  color: var(--cbo-primary);
-  margin-bottom: 14px;
-}
-.cbo-sidebar-card__head svg { width: 18px; height: 18px; flex-shrink: 0; }
-
-/* Video */
-.cbo-video-wrap {
-  border-radius: var(--cbo-r-sm);
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  background: #0F172A;
-}
-.cbo-video-wrap iframe,
-.cbo-video-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cbo-video-caption { font-size: 12px; color: var(--cbo-muted); text-align: center; margin-top: 8px; }
-
-/* Demo form */
-.cbo-demo-form { display: flex; flex-direction: column; gap: 12px; }
-.cbo-form-field { display: flex; flex-direction: column; gap: 5px; }
-.cbo-form-field label { font-size: 12.5px; font-weight: 700; color: var(--cbo-text2); }
-.cbo-input {
-  width: 100%; padding: 9px 13px;
-  border: 1.5px solid var(--cbo-border);
-  border-radius: var(--cbo-r-sm);
-  font-size: 14px; font-family: inherit;
-  color: var(--cbo-text);
-  outline: none;
-  transition: border-color .15s ease, box-shadow .15s ease;
-}
-.cbo-input:focus {
-  border-color: var(--cbo-primary);
-  box-shadow: 0 0 0 3px rgba(36,64,146,.12);
-}
-.cbo-input::placeholder { color: #94A3B8; }
-
-/* ── Schedule ─────────────────────────────────────────────────────────────── */
-.cbo-schedule {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.cbo-schedule__label {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 13px; font-weight: 700;
-  color: var(--cbo-primary);
-  margin-bottom: 8px;
-}
-.cbo-schedule__label svg { width: 14px; height: 14px; }
-.cbo-schedule__time {
-  font-size: 12.5px; color: var(--cbo-text2);
-  padding: 5px 8px;
-  background: var(--cbo-bg);
-  border-radius: 5px;
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-/* ── 24/7 Card ────────────────────────────────────────────────────────────── */
-.cbo-247-card {
-  background: linear-gradient(135deg, var(--cbo-primary-dk) 0%, var(--cbo-primary) 60%, #3B5BDB 100%);
-  border-radius: var(--cbo-r);
-  padding: 22px;
-  color: #fff;
-}
-.cbo-247-card__top {
+/* Card Header: [emoji-icon-box] [Title with left red bar] */
+.cbo__card-header {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
-.cbo-247-badge {
-  font-size: 26px; font-weight: 900;
-  color: #fff;
-  letter-spacing: -1px;
-  line-height: 1;
+.cbo__card-icon {
+  font-size: 1.5rem;
+  width: 46px; height: 46px;
+  background: var(--primary-pale);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.cbo-247-card__top strong { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.9); }
-.cbo-247-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.cbo-247-list li {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 13.5px; color: rgba(255,255,255,.85);
-}
-.cbo-247-list svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-/* ── Similar Courses ──────────────────────────────────────────────────────── */
-.cbo-similar {
-  background: #fff;
-  border-top: 1px solid var(--cbo-border);
-  padding: 56px 0;
-  margin-top: 20px;
-}
-.cbo-similar__title {
-  font-size: 28px; font-weight: 800;
-  color: var(--cbo-text);
-  margin-bottom: 6px;
-}
-.cbo-similar__sub { font-size: 15px; color: var(--cbo-muted); margin-bottom: 28px; }
-
-.cbo-similar-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-}
-@media (max-width: 900px)  { .cbo-similar-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 580px)  { .cbo-similar-grid { grid-template-columns: 1fr; } }
-
-.cbo-similar-card {
-  background: var(--cbo-card);
-  border: 1px solid var(--cbo-border);
-  border-radius: var(--cbo-r);
-  overflow: hidden;
-  box-shadow: var(--cbo-shadow);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.cbo-similar-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--cbo-shadow-md);
-}
-.cbo-similar-card__thumb {
+.cbo__card-header h2,
+.cbo__card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   position: relative;
-  aspect-ratio: 16/9;
-  background: var(--cbo-primary);
-  overflow: hidden;
+  padding-left: 14px;
 }
-.cbo-similar-card__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cbo-similar-card__dept {
-  position: absolute; top: 10px; right: 10px;
-  background: var(--cbo-accent);
-  color: #fff; font-size: 11px; font-weight: 800;
-  padding: 3px 9px; border-radius: 4px;
+.cbo__card-header h2::before,
+.cbo__card-header h3::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10%; height: 80%; width: 4px;
+  background: var(--accent);
+  border-radius: 4px;
 }
-.cbo-similar-card__body { padding: 14px 16px; }
-.cbo-similar-card__meta {
-  display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
-}
-.cbo-similar-card__meta span {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 11.5px; color: var(--cbo-muted); font-weight: 500;
-}
-.cbo-similar-card__meta svg { width: 12px; height: 12px; stroke: var(--cbo-primary); }
-.cbo-similar-card__body h4 {
-  font-size: 14px; font-weight: 800; color: var(--cbo-text);
-  line-height: 1.3; margin-bottom: 5px;
-}
-.cbo-similar-card__body h4 a { color: inherit; text-decoration: none; }
-.cbo-similar-card__body h4 a:hover { color: var(--cbo-primary); }
-.cbo-similar-card__body p { font-size: 12.5px; color: var(--cbo-muted); line-height: 1.5; margin: 0 0 10px; }
-.cbo-learn-more {
-  font-size: 12.5px; font-weight: 700;
-  color: var(--cbo-accent); text-decoration: none;
-}
-.cbo-learn-more:hover { text-decoration: underline; }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .cbo-hero { padding: 24px 0 20px; }
-  .cbo-hero__title { font-size: 24px; }
-  .cbo-section { padding: 18px 16px; }
-  .cbo-enroll-card { padding: 16px; }
+/* ============================================================
+   STYLED LIST  (Learning Objectives, Additional Support)
+   ============================================================ */
+.cbo__styled-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cbo__styled-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.9rem; color: var(--text-body); line-height: 1.55;
+}
+.cbo__styled-list li::before {
+  content: '▸';
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Programme Overview uses emoji pins inline — no ::before */
+.cbo__styled-list--icon li::before { display: none; }
+
+/* ============================================================
+   UNITS GRID (Course Contents)
+   ============================================================ */
+.cbo__units-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width:600px) { .cbo__units-grid { grid-template-columns: 1fr; } }
+
+.cbo__unit-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--bg);
+  padding: 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition), background var(--transition);
+}
+.cbo__unit-item:hover {
+  border-color: var(--primary);
+  background: rgba(36,64,146,0.04);
+}
+.cbo__unit-num {
+  background: var(--primary); color: white;
+  font-size: 0.7rem; font-weight: 700;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cbo__unit-item strong { font-size: 0.82rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
+.cbo__unit-item p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+/* ============================================================
+   FEATURES GRID (Unique Features)
+   ============================================================ */
+.cbo__features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width:600px) { .cbo__features-grid { grid-template-columns: 1fr; } }
+
+.cbo__feature-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px; background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition);
+}
+.cbo__feature-item:hover { border-color: var(--accent); }
+.cbo__feat-icon { font-size: 1.4rem; flex-shrink: 0; }
+.cbo__feature-item strong { font-size: 0.83rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
+.cbo__feature-item p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+/* ============================================================
+   INSTRUCTORS
+   ============================================================ */
+.cbo__instructors-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 14px;
+}
+@media (max-width:700px) { .cbo__instructors-grid { grid-template-columns: 1fr 1fr; } }
+
+.cbo__instructor-card {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 10px; padding: 14px 10px;
+  background: var(--bg); border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+}
+.cbo__instructor-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px rgba(36,64,146,0.12);
+}
+.cbo__instructor-img-wrap {
+  width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+  border: 2.5px solid var(--primary); flex-shrink: 0;
+  transition: transform var(--transition);
+}
+.cbo__instructor-card:hover .cbo__instructor-img-wrap { transform: scale(1.08); }
+.cbo__instructor-img-wrap img { width: 72px; height: 72px; object-fit: cover; }
+.cbo__instructor-ini {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #3558c0);
+  color: #fff; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2.5px solid var(--primary);
+}
+.cbo__instructor-info strong { display: block; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 2px; }
+.cbo__instructor-info span   { font-size: 0.72rem; color: var(--text-muted); }
+
+/* ============================================================
+   RIGHT SIDEBAR
+   ============================================================ */
+.cbo__sidebar { display: flex; flex-direction: column; gap: 0; }
+
+/* ---- ENROL CARD ---- */
+.cbo__enrol-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-inset), var(--shadow-card);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.cbo__enrol-card:hover {
+  box-shadow: var(--shadow-inset), var(--shadow-hover);
+}
+.cbo__enrol-title {
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--text-dark); margin-bottom: 18px;
+}
+
+/* Toggle */
+.cbo__price-toggle {
+  display: flex;
+  background: var(--bg); border-radius: var(--radius-pill);
+  padding: 4px; margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.cbo__toggle-btn {
+  flex: 1; padding: 8px 0;
+  border: none; border-radius: var(--radius-pill);
+  background: transparent; font-family: var(--font);
+  font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+  cursor: pointer; transition: background var(--transition), color var(--transition);
+}
+.cbo__toggle-btn.active {
+  background: var(--primary); color: white;
+  box-shadow: 0 2px 8px rgba(36,64,146,0.3);
+}
+
+/* Price block */
+.cbo__price-block {
+  display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
+}
+.cbo__price-amount {
+  font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1;
+}
+.cbo__price-amount .woocommerce-Price-amount,
+.cbo__price-amount .amount { font-size: inherit; color: inherit; font-weight: inherit; }
+.cbo__price-period { font-size: 0.9rem; color: var(--text-muted); }
+.cbo__price-note {
+  font-size: 0.8rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
+  background: #f0fdf4; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid #bbf7d0; visibility: hidden;
+}
+.cbo__price-note.visible { visibility: visible; }
+.cbo__price-free {
+  font-size: 0.8rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
+  background: #f0fdf4; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid #bbf7d0;
+}
+
+/* Enrol button */
+.cbo__enrol-btn {
+  display: block; width: 100%;
+  background: var(--accent); color: white; border: none;
+  border-radius: var(--radius-sm); padding: 14px;
+  font-family: var(--font); font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; text-align: center; letter-spacing: 0.02em;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(239,62,38,0.30);
+  text-decoration: none;
+}
+.cbo__enrol-btn:hover {
+  background: var(--accent-hover); color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(239,62,38,0.40);
+}
+.cbo__enrol-btn--ghost {
+  background: transparent; border: 2px solid var(--primary); color: var(--primary);
+  box-shadow: none;
+}
+.cbo__enrol-btn--ghost:hover { background: var(--primary); color: white; transform: none; }
+
+/* Perks */
+.cbo__enrol-perks { display: flex; flex-direction: column; gap: 8px; }
+.cbo__enrol-perks li { font-size: 0.83rem; color: var(--text-body); }
+
+/* ---- VIDEO CARD ---- */
+.cbo__video-box {
+  border-radius: var(--radius-sm);
+  overflow: hidden; position: relative; cursor: pointer;
+}
+.cbo__video-box iframe {
+  display: block; width: 100%; aspect-ratio: 16/9; border: 0;
+}
+.cbo__video-thumb {
+  height: 200px; object-fit: cover; display: block; width: 100%;
+  transition: transform 0.5s ease;
+}
+.cbo__video-box:hover .cbo__video-thumb { transform: scale(1.04); }
+.cbo__play-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15,31,80,0.38);
+  transition: background var(--transition);
+}
+.cbo__video-box:hover .cbo__play-overlay { background: rgba(15,31,80,0.22); }
+.cbo__play-btn {
+  width: 60px; height: 60px;
+  background: var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  transition: transform var(--transition), box-shadow var(--transition);
+  padding-left: 4px;
+}
+.cbo__play-btn:hover { transform: scale(1.12); box-shadow: 0 8px 28px rgba(239,62,38,0.55); }
+.cbo__video-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(15,31,80,0.8));
+  color: rgba(255,255,255,0.88); font-size: 0.78rem; font-weight: 500;
+  padding: 20px 12px 10px; text-align: center;
+}
+
+/* ---- DEMO FORM ---- */
+.cbo__demo-sub {
+  font-size: 0.83rem; color: var(--text-muted); margin-bottom: 18px;
+}
+.cbo__form-group { margin-bottom: 14px; }
+.cbo__form-group label {
+  display: block; font-size: 0.8rem; font-weight: 600;
+  color: var(--text-dark); margin-bottom: 6px;
+}
+.cbo__form-group input {
+  width: 100%; border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  font-family: var(--font); font-size: 0.88rem; color: var(--text-dark);
+  background: var(--bg); outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.cbo__form-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(36,64,146,0.10);
+}
+.cbo__form-group input::placeholder { color: var(--text-muted); }
+.cbo__form-ok {
+  margin-top: 10px; background: #f0fdf4; color: #16a34a;
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-size: 0.83rem; font-weight: 600; text-align: center; display: none;
+  border: 1px solid #bbf7d0;
+}
+
+/* ---- BATCH SCHEDULE ---- */
+.cbo__schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width:600px) { .cbo__schedule-grid { grid-template-columns: 1fr; } }
+.cbo__schedule-heading {
+  font-size: 0.82rem; font-weight: 700; color: var(--text-dark);
+  margin-bottom: 10px;
+}
+.cbo__schedule-heading--morning { color: #b45309; }
+.cbo__schedule-heading--evening { color: var(--primary); }
+.cbo__time-pill {
+  display: block; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--radius-pill);
+  padding: 7px 12px; font-size: 0.76rem; font-weight: 600;
+  color: var(--text-body); text-align: center; margin-bottom: 8px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+}
+.cbo__time-pill:hover {
+  background: var(--primary); border-color: var(--primary);
+  color: white; transform: scale(1.03);
+}
+
+/* ---- 24/7 CARD ---- */
+.cbo__support-card {
+  background: linear-gradient(135deg, var(--primary) 0%, #1b306e 100%);
+  color: white; position: relative; overflow: hidden;
+  border-radius: var(--radius); padding: 28px;
+  margin-bottom: 0;
+  box-shadow: var(--shadow-inset), var(--shadow-card);
+  border: 1px solid var(--border);
+}
+.cbo__support-card::before {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.cbo__support-badge {
+  font-size: 3rem; font-weight: 900; color: #ffd166;
+  line-height: 1; margin-bottom: 6px; letter-spacing: -0.04em;
+}
+.cbo__support-card h3 {
+  font-size: 1rem; font-weight: 700;
+  color: rgba(255,255,255,0.9); margin-bottom: 18px;
+}
+.cbo__support-list { display: flex; flex-direction: column; gap: 12px; }
+.cbo__support-list li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.85rem; color: rgba(255,255,255,0.82);
+}
+.cbo__s-icon {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.12); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+/* ============================================================
+   SIMILAR COURSES SECTION
+   ============================================================ */
+.cbo__similar {
+  background: #fff;
+  border-top: 1px solid rgba(36,64,146,0.10);
+  padding: 52px 0 60px;
+}
+.cbo__section-header { margin-bottom: 28px; }
+.cbo__section-header h2 {
+  font-size: 1.6rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;
+}
+.cbo__section-header p { font-size: 0.9rem; color: var(--text-muted); }
+
+.cbo__similar-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 22px;
+}
+@media (max-width:900px) { .cbo__similar-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width:500px) { .cbo__similar-grid { grid-template-columns: 1fr; } }
+
+/* Course card */
+.cbo__course-card {
+  background: #fff; border-radius: 20px; overflow: hidden;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 4px 20px rgba(36,64,146,0.10);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.cbo__course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 44px rgba(36,64,146,0.18);
+}
+.cbo__cc-hero {
+  position: relative; height: 200px; overflow: hidden; padding: 14px 14px 0;
+}
+.cbo__cc-subject {
+  position: relative; z-index: 3;
+  display: inline-block; color: #fff;
+  font-size: 0.9rem; font-weight: 800;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+}
+.cbo__cc-badge {
+  position: absolute; top: 14px; right: 14px; z-index: 4;
+  background: #ffd166; color: #1a2340;
+  font-size: 0.82rem; font-weight: 900;
+  padding: 4px 12px; border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+}
+.cbo__cc-img {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 175px; z-index: 2;
+}
+.cbo__cc-img img { width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  transition: transform 0.45s ease; }
+.cbo__course-card:hover .cbo__cc-img img { transform: scale(1.06); }
+.cbo__cc-body { padding: 14px 16px 18px; background: #fff; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.cbo__cc-meta { display: flex; align-items: flex-start; gap: 20px; }
+.cbo__cc-meta-item { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; color: var(--text-body); line-height: 1.4; }
+.cbo__cc-meta-item strong { display: block; font-weight: 700; color: var(--text-dark); font-size: 0.8rem; }
+.cbo__cc-meta-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.cbo__cc-meta-icon--play { background: rgba(239,62,38,0.12); color: var(--accent); font-size: 0.65rem; padding-left: 2px; }
+.cbo__cc-meta-icon--cal  { background: rgba(36,64,146,0.10); color: var(--primary); font-size: 0.75rem; }
+.cbo__cc-title { font-size: 1rem; font-weight: 800; color: var(--accent); line-height: 1.2; margin: 0; }
+.cbo__cc-desc  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.cbo__cc-more  {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.82rem; font-weight: 700; color: var(--primary);
+  transition: color var(--transition), gap var(--transition);
+}
+.cbo__cc-more:hover { color: var(--accent); gap: 9px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:900px) {
+  .cbo__layout { grid-template-columns: 1fr; }
+  .cbo__units-grid { grid-template-columns: 1fr; }
+  .cbo__features-grid { grid-template-columns: 1fr; }
+  .cbo__instructors-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width:600px) {
+  .cbo__container { padding: 0 16px; }
+  .cbo__course-title { font-size: 1.4rem; }
+  .cbo__card { padding: 20px; }
+  .cbo__price-amount { font-size: 1.8rem; }
+}
+
+/* Video placeholder (when no URL or thumbnail set) */
+.cbo__video-placeholder {
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #1a2340 0%, #244092 100%);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+}
+.cbo__video-placeholder p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.78rem;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   ENROL BUTTON — pixel-perfect match to reference
+   ============================================================ */
+.cbo__enrol-btn {
+  display: block;
+  width: 100%;
+  background: var(--accent);
+  color: white !important;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px 20px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.02em;
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(239,62,38,0.30);
+  text-decoration: none !important;
+  line-height: 1.4;
+}
+.cbo__enrol-btn:hover,
+.cbo__enrol-btn:focus {
+  background: var(--accent-hover) !important;
+  color: white !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(239,62,38,0.45);
+  text-decoration: none !important;
+}
+
+/* ============================================================
+   HOVER TRANSITIONS — all interactive blocks
+   ============================================================ */
+
+/* Cards lift on hover */
+.cbo__card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.cbo__card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-inset), var(--shadow-hover) !important;
+}
+
+/* Enrol card */
+.cbo__enrol-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cbo__enrol-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-inset), var(--shadow-hover);
+}
+
+/* Unit items */
+.cbo__unit-item {
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cbo__unit-item:hover {
+  border-color: var(--primary) !important;
+  background: rgba(36,64,146,0.04) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(36,64,146,0.10);
+}
+
+/* Feature items */
+.cbo__feature-item {
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cbo__feature-item:hover {
+  border-color: var(--accent) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(239,62,38,0.10);
+}
+
+/* Instructor cards */
+.cbo__instructor-card {
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Time pills */
+.cbo__time-pill {
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.cbo__time-pill:hover {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+  transform: scale(1.03);
+}
+
+/* Similar course cards */
+.cbo__course-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cbo__course-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 18px 44px rgba(36,64,146,0.18) !important;
+}
+
+/* Learn more link */
+.cbo__cc-more {
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+.cbo__cc-more:hover {
+  color: var(--accent);
+  gap: 9px;
 }

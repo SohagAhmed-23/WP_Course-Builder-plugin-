@@ -39,6 +39,24 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+/**
+ * SAFETY GUARD — Data is only deleted if the admin explicitly opted in
+ * via Settings → Course Builder → "Delete all data on uninstall" checkbox.
+ *
+ * When updating the plugin (even via zip upload), WordPress calls uninstall.php.
+ * Without this guard every update would wipe all courses, teachers and categories.
+ *
+ * To enable full cleanup on delete, set the option before deleting the plugin:
+ *   update_option( 'cb_delete_data_on_uninstall', 1 );
+ */
+if ( ! get_option( 'cb_delete_data_on_uninstall' ) ) {
+    // DATA PRESERVED — do not delete courses, teachers or categories.
+    // Keep cb_version so the reinstall version-check triggers a rewrite flush.
+    // This is the default safe mode used on every update / zip re-upload.
+    exit;
+}
+
+
 global $wpdb;
 
 /* ── 1. All cb_course + cb_teacher posts ─────────────────────────────────── */

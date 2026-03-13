@@ -24,6 +24,7 @@ class Ajax_Handler {
             'cb_delete_teacher',
             // Misc
             'cb_get_wc_products',
+            'cb_refresh_nonce',
         ];
 
         foreach ( $actions as $action ) {
@@ -32,14 +33,40 @@ class Ajax_Handler {
     }
 
     public function dispatch(): void {
-        $action = sanitize_key( $_REQUEST['action'] ?? '' );
-        $method = 'handle_' . str_replace( 'cb_', '', $action );
+        // Turn any PHP warnings/notices into catchable errors so they
+        // don't corrupt the JSON response and cause an endless spinner.
+        set_error_handler( function( $errno, $errstr ) {
+            throw new \ErrorException( $errstr, $errno );
+        }, E_ALL & ~E_DEPRECATED & ~E_STRICT );
 
-        if ( ! method_exists( $this, $method ) ) {
-            wp_send_json_error( [ 'message' => 'Unknown action.' ], 400 );
+        try {
+            $action = sanitize_key( $_REQUEST['action'] ?? '' );
+            $method = 'handle_' . str_replace( 'cb_', '', $action );
+
+            if ( ! method_exists( $this, $method ) ) {
+                wp_send_json_error( [ 'message' => 'Unknown action: ' . $action ], 400 );
+            }
+
+            $this->$method();
+
+        } catch ( \Throwable $e ) {
+            wp_send_json_error( [
+                'message' => 'Server error: ' . $e->getMessage(),
+                'file'    => basename( $e->getFile() ),
+                'line'    => $e->getLine(),
+            ], 500 );
+        } finally {
+            restore_error_handler();
         }
+    }
 
-        $this->$method();
+    // ── Nonce refresh (called when nonce expires) ────────────────────────────
+
+    private function handle_refresh_nonce(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+        wp_send_json_success( [ 'nonce' => wp_create_nonce( 'cb_admin_nonce' ) ] );
     }
 
     // ── Security helper ───────────────────────────────────────────────────────
@@ -79,6 +106,7 @@ class Ajax_Handler {
             'age_min'     => get_post_meta( $post->ID, '_cb_age_min', true ),
             'duration'    => get_post_meta( $post->ID, '_cb_duration_months', true ),
             'live_classes'=> get_post_meta( $post->ID, '_cb_live_classes', true ),
+            'permalink'   => get_permalink( $post->ID ),
             ];
         }
 
@@ -157,7 +185,9 @@ class Ajax_Handler {
         update_post_meta( $post_id, '_cb_wc_product_id', $data['wc_product_id'] );
 
         wp_send_json_success( [
-            'message' => $data['id'] ? 'Course updated.' : 'Course created.',
+            'message'   => $data['id'] ? 'Course updated.' : 'Course created.',
+            'id'        => $post_id,
+            'permalink' => get_permalink( $post_id ),
             'id'      => $post_id,
         ] );
     }

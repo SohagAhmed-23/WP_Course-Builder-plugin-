@@ -1,536 +1,502 @@
 <?php
 /**
- * Course Builder — Single Course Overview Page
- * Slug: /course/{course-slug}
+ * Course Builder — Single Course Page
+ * Design: Pedago Kids reference (Poppins, #244092 primary, #EF3E26 accent)
  */
 defined( 'ABSPATH' ) || exit;
 
-$course_id     = get_the_ID();
-$title         = get_the_title();
-$subtitle      = get_post_meta( $course_id, '_cb_subtitle',          true );
-$duration      = (int) get_post_meta( $course_id, '_cb_duration_months', true );
-$age_min       = (int) get_post_meta( $course_id, '_cb_age_min',         true );
-$live_classes  = (int) get_post_meta( $course_id, '_cb_live_classes',    true );
-$teacher_id    = (int) get_post_meta( $course_id, '_cb_teacher_id',      true );
-$wc_product_id = (int) get_post_meta( $course_id, '_cb_wc_product_id',   true );
-$video_url     = get_post_meta( $course_id, '_cb_video_url',         true );
-$thumb_url     = get_the_post_thumbnail_url( $course_id, 'large' ) ?: '';
+$cid       = get_the_ID();
+$title     = get_the_title();
+$subtitle  = get_post_meta( $cid, '_cb_subtitle',          true );
+$duration  = (int) get_post_meta( $cid, '_cb_duration_months', true );
+$age_min   = (int) get_post_meta( $cid, '_cb_age_min',         true );
+$live      = (int) get_post_meta( $cid, '_cb_live_classes',    true );
+$wc_id     = (int) get_post_meta( $cid, '_cb_wc_product_id',   true );
+$video_url = get_post_meta( $cid, '_cb_video_url', true );
+$thumb     = get_the_post_thumbnail_url( $cid, 'large' ) ?: '';
 
-$objectives  = json_decode( get_post_meta( $course_id, '_cb_learning_objectives', true ) ?: '[]', true );
-$overview    = json_decode( get_post_meta( $course_id, '_cb_programme_overview',  true ) ?: '[]', true );
-$units       = json_decode( get_post_meta( $course_id, '_cb_course_content',      true ) ?: '[]', true );
-$support     = json_decode( get_post_meta( $course_id, '_cb_additional_support',  true ) ?: '[]', true );
+$objectives = array_values( array_filter( (array) json_decode( get_post_meta( $cid, '_cb_learning_objectives', true ) ?: '[]', true ), 'trim' ) );
+$overview   = array_values( array_filter( (array) json_decode( get_post_meta( $cid, '_cb_programme_overview',  true ) ?: '[]', true ), 'trim' ) );
+$units_raw  = (array) json_decode( get_post_meta( $cid, '_cb_course_content', true ) ?: '[]', true );
+$units      = array_values( array_filter( $units_raw, fn( $u ) => ! empty( $u['title'] ) ) );
+$support    = array_values( array_filter( (array) json_decode( get_post_meta( $cid, '_cb_additional_support', true ) ?: '[]', true ), 'trim' ) );
 
-// Dept
-$terms     = wp_get_post_terms( $course_id, 'cb_category' );
-$dept_id   = ( ! empty( $terms ) && ! is_wp_error( $terms ) ) ? $terms[0]->term_id  : 0;
-$dept_name = ( ! empty( $terms ) && ! is_wp_error( $terms ) ) ? $terms[0]->name     : '';
+/* Dept / taxonomy */
+$terms     = wp_get_post_terms( $cid, 'cb_category' );
+$dept_id   = ( ! empty( $terms ) && ! is_wp_error( $terms ) ) ? (int) $terms[0]->term_id : 0;
+$dept_name = ( ! empty( $terms ) && ! is_wp_error( $terms ) ) ? $terms[0]->name : '';
 
-// Teacher from this dept
+/* Teachers in same dept */
 $dept_teachers = [];
 if ( $dept_id ) {
-    $all_teachers = get_posts([ 'post_type'=>'cb_teacher','posts_per_page'=>-1,'post_status'=>'publish' ]);
-    foreach ( $all_teachers as $t ) {
-        $cats = json_decode( get_post_meta( $t->ID, '_cb_categories', true ) ?: '[]', true );
-        if ( in_array( $dept_id, array_map('intval', $cats) ) ) {
-            $dept_teachers[] = $t;
-        }
-    }
+	foreach ( get_posts( [ 'post_type' => 'cb_teacher', 'posts_per_page' => -1, 'post_status' => 'publish' ] ) as $t ) {
+		$tcats = array_map( 'intval', (array) json_decode( get_post_meta( $t->ID, '_cb_categories', true ) ?: '[]', true ) );
+		if ( in_array( $dept_id, $tcats, true ) ) $dept_teachers[] = $t;
+	}
 }
 
-// WooCommerce
-$product        = $wc_product_id && function_exists('wc_get_product') ? wc_get_product($wc_product_id) : null;
-$is_free        = false;
-$variations_data = [];
+/* WooCommerce */
+$product   = ( $wc_id && function_exists( 'wc_get_product' ) ) ? wc_get_product( $wc_id ) : null;
+$is_free   = false;
+$vars_data = [];
+$s_price   = '';
+$s_url     = '';
+
 if ( $product ) {
-    if ( $product->get_type() === 'variable' ) {
-        foreach ( $product->get_available_variations() as $v ) {
-            $var = wc_get_product( $v['variation_id'] );
-            if ( ! $var ) continue;
-            $attrs = [];
-            foreach ( $v['attributes'] as $k => $val ) {
-                $term_obj = get_term_by( 'slug', $val, str_replace('attribute_', '', $k) );
-                $attrs[]  = $term_obj ? $term_obj->name : ucfirst($val);
-            }
-            $variations_data[] = [
-                'id'         => $v['variation_id'],
-                'label'      => implode( ' / ', $attrs ) ?: 'Option',
-                'price'      => (float) $var->get_price(),
-                'price_html' => wc_price( $var->get_price() ),
-                'add_url'    => add_query_arg([ 'add-to-cart' => $v['variation_id'] ], wc_get_checkout_url() ),
-            ];
-        }
-    } elseif ( (float) $product->get_price() == 0 ) {
-        $is_free = true;
-    }
+	if ( $product->get_type() === 'variable' ) {
+		foreach ( $product->get_available_variations() as $v ) {
+			$var = wc_get_product( $v['variation_id'] );
+			if ( ! $var ) continue;
+			$lbls = [];
+			foreach ( $v['attributes'] as $k => $val ) {
+				$tx     = str_replace( 'attribute_', '', $k );
+				$tobj   = get_term_by( 'slug', $val, $tx );
+				$lbls[] = $tobj ? $tobj->name : ucfirst( str_replace( '-', ' ', $val ) );
+			}
+			$label = implode( ' / ', $lbls ) ?: 'Option';
+			$vars_data[] = [
+				'label'      => $label,
+				'price_html' => wc_price( $var->get_price() ),
+				'period'     => strtolower( $label ),
+				'url'        => add_query_arg( [ 'add-to-cart' => $v['variation_id'] ], wc_get_checkout_url() ),
+			];
+		}
+	} elseif ( (float) $product->get_price() == 0 ) {
+		$is_free = true;
+	} else {
+		$s_price = $product->get_price_html();
+		$s_url   = add_query_arg( [ 'add-to-cart' => $wc_id ], wc_get_checkout_url() );
+	}
 }
 
-// Similar courses
-$similar = get_posts([
-    'post_type'      => 'cb_course',
-    'post_status'    => 'publish',
-    'posts_per_page' => 4,
-    'post__not_in'   => [ $course_id ],
-    'tax_query'      => $dept_id ? [[
-        'taxonomy' => 'cb_category',
-        'field'    => 'term_id',
-        'terms'    => $dept_id,
-    ]] : [],
-]);
+/* Similar courses */
+$similar = $dept_id ? get_posts( [
+	'post_type' => 'cb_course', 'post_status' => 'publish',
+	'posts_per_page' => 4, 'post__not_in' => [ $cid ],
+	'tax_query' => [ [ 'taxonomy' => 'cb_category', 'field' => 'term_id', 'terms' => $dept_id ] ],
+] ) : [];
 
-// Unit count
-$unit_count = count( array_filter( $units, fn($u) => !empty($u['title']) ) );
+$unit_count = count( $units );
 
-// Video embed
-function cb_embed( string $url ): string {
-    if ( preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/', $url, $m) )
-        return 'https://www.youtube.com/embed/' . $m[1] . '?rel=0&modestbranding=1';
-    if ( preg_match('/vimeo\.com\/(\d+)/', $url, $m) )
-        return 'https://player.vimeo.com/video/' . $m[1];
-    return $url;
+/* Video embed helper */
+if ( ! function_exists( 'cb_embed_url' ) ) {
+	function cb_embed_url( string $url ): string {
+		if ( preg_match( '/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/', $url, $m ) )
+			return 'https://www.youtube.com/embed/' . $m[1] . '?rel=0&modestbranding=1';
+		if ( preg_match( '/vimeo\.com\/(\d+)/', $url, $m ) )
+			return 'https://player.vimeo.com/video/' . $m[1];
+		return '';
+	}
 }
+$embed_url = $video_url ? cb_embed_url( $video_url ) : '';
 
 get_header();
 ?>
-<div class="cbo-page">
+<div class="cbo">
 
-    <!-- ── HERO ─────────────────────────────────────────────────────────────── -->
-    <div class="cbo-hero">
-        <div class="cbo-container">
-            <?php if ( $dept_name ) : ?>
-                <div class="cbo-hero__breadcrumb">
-                    <a href="<?php echo home_url('/'); ?>">Home</a>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    <span><?php echo esc_html($dept_name); ?></span>
-                </div>
-            <?php endif; ?>
+<!-- ══════════════════════  HERO  ══════════════════════ -->
+<section class="cbo__hero">
+	<div class="cbo__container">
 
-            <h1 class="cbo-hero__title"><?php echo esc_html($title); ?></h1>
-            <?php if ($subtitle) : ?>
-                <p class="cbo-hero__subtitle"><?php echo esc_html($subtitle); ?></p>
-            <?php endif; ?>
+		<?php if ( $dept_name ) : ?>
+		<nav class="cbo__breadcrumb">
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+			<a href="#">Courses</a>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+			<span><?php echo esc_html( $dept_name ); ?></span>
+		</nav>
+		<?php endif; ?>
 
-            <!-- Stats bar -->
-            <div class="cbo-stats-bar">
-                <?php if ($unit_count) : ?>
-                <div class="cbo-stat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    <strong><?php echo esc_html($unit_count); ?> Units</strong>
-                </div>
-                <?php endif; ?>
-                <?php if ($duration) : ?>
-                <div class="cbo-stat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <strong><?php echo esc_html($duration); ?> Months</strong>
-                </div>
-                <?php endif; ?>
-                <?php if ($age_min) : ?>
-                <div class="cbo-stat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    <strong>Age <?php echo esc_html($age_min); ?>+</strong>
-                </div>
-                <?php endif; ?>
-                <div class="cbo-stat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    <strong>Online Live</strong>
-                </div>
-            </div>
-        </div>
-    </div>
+		<h1 class="cbo__course-title"><?php echo esc_html( $title ); ?></h1>
 
-    <!-- ── MAIN CONTENT ─────────────────────────────────────────────────────── -->
-    <div class="cbo-container cbo-layout">
+		<?php if ( $subtitle ) : ?>
+		<p class="cbo__course-tagline"><?php echo esc_html( $subtitle ); ?></p>
+		<?php endif; ?>
 
-        <!-- LEFT COLUMN -->
-        <div class="cbo-main">
+		<div class="cbo__hero-meta">
+			<?php if ( $unit_count ) : ?><span class="cbo__meta-pill"><?php echo $unit_count; ?> Units</span><?php endif; ?>
+			<?php if ( $live )        : ?><span class="cbo__meta-pill"><?php echo $live; ?> Live Classes</span><?php endif; ?>
+			<?php if ( $duration )    : ?><span class="cbo__meta-pill"><?php echo $duration; ?> Months</span><?php endif; ?>
+			<?php if ( $age_min )     : ?><span class="cbo__meta-pill">Age <?php echo $age_min; ?>+</span><?php endif; ?>
+			<span class="cbo__meta-pill">Online Live</span>
+		</div>
 
-            <!-- Learning Objectives -->
-            <?php if ( !empty($objectives) ) : ?>
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--red">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    </div>
-                    <h2>Learning Objectives</h2>
-                </div>
-                <ul class="cbo-points">
-                    <?php foreach ($objectives as $obj) : if (!trim($obj)) continue; ?>
-                        <li><?php echo esc_html($obj); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php endif; ?>
+	</div>
+</section>
 
-            <!-- Programme Overview -->
-            <?php if ( !empty($overview) ) : ?>
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--blue">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
-                    </div>
-                    <h2>Programme Overview</h2>
-                </div>
-                <ul class="cbo-points cbo-points--flame">
-                    <?php foreach ($overview as $pt) : if (!trim($pt)) continue; ?>
-                        <li><?php echo esc_html($pt); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php endif; ?>
+<!-- ══════════════════════  BODY  ══════════════════════ -->
+<div class="cbo__container">
+<div class="cbo__layout">
 
-            <!-- Course Contents -->
-            <?php if ( !empty($units) ) : ?>
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--teal">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    </div>
-                    <h2>Course Contents</h2>
-                </div>
-                <div class="cbo-units-grid">
-                    <?php foreach ($units as $i => $unit) : if (empty($unit['title'])) continue; ?>
-                    <div class="cbo-unit-card">
-                        <div class="cbo-unit-card__num"><?php printf('%02d', $i + 1); ?></div>
-                        <div class="cbo-unit-card__body">
-                            <strong><?php echo esc_html($unit['title']); ?></strong>
-                            <?php if (!empty($unit['lessons'])) : ?>
-                                <p><?php echo esc_html($unit['lessons']); ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+	<!-- ═════ LEFT COLUMN ═════ -->
+	<div class="cbo__left-col">
 
-            <!-- Additional Support -->
-            <?php if ( !empty($support) ) : ?>
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--yellow">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </div>
-                    <h2>Additional Support</h2>
-                </div>
-                <ul class="cbo-points">
-                    <?php foreach ($support as $s) : if (!trim($s)) continue; ?>
-                        <li><?php echo esc_html($s); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php endif; ?>
+		<!-- Learning Objectives -->
+		<?php if ( ! empty( $objectives ) ) : ?>
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">🎯</div>
+				<h2>Learning Objectives</h2>
+			</div>
+			<ul class="cbo__styled-list">
+				<?php foreach ( $objectives as $obj ) : ?><li><?php echo esc_html( $obj ); ?></li><?php endforeach; ?>
+			</ul>
+		</div>
+		<?php endif; ?>
 
-            <!-- Unique Features (static) -->
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--gold">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    </div>
-                    <h2>Unique Features</h2>
-                </div>
-                <div class="cbo-features-grid">
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#FFF0F0">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#EF3E26" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        </div>
-                        <strong>Neuro-Friendly Design</strong>
-                        <p>Multi-sensory tools for all learning styles</p>
-                    </div>
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#F0F4FF">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#244092" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                        </div>
-                        <strong>Music-Led Learning</strong>
-                        <p>Jolly songs make phonics memorable and fun</p>
-                    </div>
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#F0FFF8">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-                        </div>
-                        <strong>Achievement Badges</strong>
-                        <p>Digital rewards after every completed unit</p>
-                    </div>
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#FFF8F0">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                        </div>
-                        <strong>Mobile-Friendly Sessions</strong>
-                        <p>Learn on any device, anywhere</p>
-                    </div>
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#F5F0FF">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                        </div>
-                        <strong>Native-Level Instructors</strong>
-                        <p>Qualified, fully-certified teachers</p>
-                    </div>
-                    <div class="cbo-feature-card">
-                        <div class="cbo-feature-card__icon" style="background:#F0FAFF">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        </div>
-                        <strong>Data-Driven Progress</strong>
-                        <p>Real-time analytics for each child's growth</p>
-                    </div>
-                </div>
-            </div>
+		<!-- Programme Overview -->
+		<?php if ( ! empty( $overview ) ) : ?>
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">📋</div>
+				<h2>Programme Overview</h2>
+			</div>
+			<ul class="cbo__styled-list cbo__styled-list--icon">
+				<?php foreach ( $overview as $pt ) : ?><li>📌 <?php echo esc_html( $pt ); ?></li><?php endforeach; ?>
+			</ul>
+		</div>
+		<?php endif; ?>
 
-            <!-- Course Instructors -->
-            <?php if ( !empty($dept_teachers) ) : ?>
-            <div class="cbo-section">
-                <div class="cbo-section__head">
-                    <div class="cbo-section__icon cbo-section__icon--purple">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <h2>Course Instructors</h2>
-                </div>
-                <div class="cbo-instructors">
-                    <?php foreach ($dept_teachers as $t) :
-                        $pid = (int) get_post_meta($t->ID, '_cb_photo_id', true);
-                        $photo = $pid ? wp_get_attachment_image_url($pid, 'thumbnail') : '';
-                        $desig = get_post_meta($t->ID, '_cb_designation', true);
-                        $parts = explode(' ', trim($t->post_title));
-                        $initials = strtoupper(($parts[0][0] ?? '') . (end($parts)[0] ?? ''));
-                    ?>
-                    <div class="cbo-instructor">
-                        <?php if ($photo) : ?>
-                            <img src="<?php echo esc_url($photo); ?>" alt="<?php echo esc_attr($t->post_title); ?>" class="cbo-instructor__photo">
-                        <?php else : ?>
-                            <div class="cbo-instructor__photo cbo-instructor__initials"><?php echo esc_html($initials); ?></div>
-                        <?php endif; ?>
-                        <strong class="cbo-instructor__name"><?php echo esc_html($t->post_title); ?></strong>
-                        <?php if ($desig) : ?><span class="cbo-instructor__desig"><?php echo esc_html($desig); ?></span><?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endif; ?>
+		<!-- Course Contents -->
+		<?php if ( ! empty( $units ) ) : ?>
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">📚</div>
+				<h2>Course Contents</h2>
+			</div>
+			<div class="cbo__units-grid">
+				<?php foreach ( $units as $i => $unit ) : ?>
+				<div class="cbo__unit-item">
+					<span class="cbo__unit-num"><?php printf( '%02d', $i + 1 ); ?></span>
+					<div>
+						<strong><?php echo esc_html( $unit['title'] ); ?></strong>
+						<?php if ( ! empty( $unit['lessons'] ) ) : ?><p><?php echo esc_html( $unit['lessons'] ); ?></p><?php endif; ?>
+					</div>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php endif; ?>
 
-        </div><!-- .cbo-main -->
+		<!-- Additional Support -->
+		<?php if ( ! empty( $support ) ) : ?>
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">🤝</div>
+				<h2>Additional Support</h2>
+			</div>
+			<ul class="cbo__styled-list">
+				<?php foreach ( $support as $s ) : ?><li><?php echo esc_html( $s ); ?></li><?php endforeach; ?>
+			</ul>
+		</div>
+		<?php endif; ?>
 
-        <!-- RIGHT SIDEBAR -->
-        <div class="cbo-sidebar">
+		<!-- Unique Features -->
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">✨</div>
+				<h2>Unique Features</h2>
+			</div>
+			<div class="cbo__features-grid">
+				<?php foreach ( [
+					[ '🧠', 'Neuro-Friendly Design',   'Multi-sensory tasks for all learning styles' ],
+					[ '🎵', 'Music-Led Learning',       'Jolly Songs make phonics memorable and fun' ],
+					[ '🏆', 'Achievement Badges',       'Digital rewards after every completed unit' ],
+					[ '📱', 'Mobile-Friendly Sessions', 'Learn on any device, anywhere' ],
+					[ '🌍', 'Native-Level Instructors', 'Qualified TEFL-certified teachers' ],
+					[ '📊', 'Data-Driven Progress',     "Real-time analytics for each child's growth" ],
+				] as $f ) : ?>
+				<div class="cbo__feature-item">
+					<span class="cbo__feat-icon"><?php echo $f[0]; ?></span>
+					<div><strong><?php echo esc_html( $f[1] ); ?></strong><p><?php echo esc_html( $f[2] ); ?></p></div>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
 
-            <!-- Enroll Card -->
-            <div class="cbo-enroll-card">
-                <h3>Enrol in this Course</h3>
+		<!-- Course Instructors -->
+		<?php if ( ! empty( $dept_teachers ) ) : ?>
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">👩‍🏫</div>
+				<h2>Course Instructors</h2>
+			</div>
+			<div class="cbo__instructors-grid">
+				<?php foreach ( $dept_teachers as $t ) :
+					$pid   = (int) get_post_meta( $t->ID, '_cb_photo_id', true );
+					$photo = $pid ? wp_get_attachment_image_url( $pid, 'thumbnail' ) : '';
+					$desig = get_post_meta( $t->ID, '_cb_designation', true );
+					$parts = explode( ' ', trim( $t->post_title ) );
+					$ini   = strtoupper( ( $parts[0][0] ?? '' ) . ( end( $parts )[0] ?? '' ) );
+				?>
+				<div class="cbo__instructor-card">
+					<div class="cbo__instructor-img-wrap">
+						<?php if ( $photo ) : ?>
+						<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $t->post_title ); ?>">
+						<?php else : ?>
+						<div class="cbo__instructor-ini" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#244092,#3558c0);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;"><?php echo esc_html( $ini ); ?></div>
+						<?php endif; ?>
+					</div>
+					<div class="cbo__instructor-info">
+						<strong><?php echo esc_html( $t->post_title ); ?></strong>
+						<?php if ( $desig ) : ?><span><?php echo esc_html( $desig ); ?></span><?php endif; ?>
+					</div>
+				</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php endif; ?>
 
-                <?php if ( $product && !$is_free && !empty($variations_data) ) : ?>
-                <!-- Variation toggle (monthly/yearly) -->
-                <div class="cbo-var-tabs" id="cbo-var-tabs">
-                    <?php foreach ($variations_data as $i => $v) : ?>
-                    <button class="cbo-var-tab <?php echo $i===0?'active':''; ?>"
-                            data-id="<?php echo esc_attr($v['id']); ?>"
-                            data-price="<?php echo esc_attr($v['price_html']); ?>"
-                            data-url="<?php echo esc_url($v['add_url']); ?>">
-                        <?php echo esc_html($v['label']); ?>
-                    </button>
-                    <?php endforeach; ?>
-                </div>
-                <div class="cbo-price" id="cbo-price">
-                    <?php echo wp_kses_post($variations_data[0]['price_html'] ?? ''); ?>
-                    <span class="cbo-price__period" id="cbo-period">/ <?php echo esc_html( strtolower($variations_data[0]['label'] ?? '') ); ?></span>
-                </div>
-                <a href="<?php echo esc_url($variations_data[0]['add_url'] ?? '#'); ?>"
-                   class="cbo-enroll-btn" id="cbo-enroll-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
-                    Enrol Now
-                </a>
+	</div><!-- /left-col -->
 
-                <?php elseif ( $is_free ) : ?>
-                <div class="cbo-price cbo-price--free">FREE</div>
-                <a href="<?php echo esc_url( get_permalink($wc_product_id) ); ?>"
-                   class="cbo-enroll-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
-                    Enrol Free
-                </a>
+	<!-- ═════ RIGHT SIDEBAR ═════ -->
+	<div class="cbo__sidebar">
 
-                <?php elseif ( $product ) : ?>
-                <div class="cbo-price"><?php echo wp_kses_post($product->get_price_html()); ?></div>
-                <a href="<?php echo esc_url( add_query_arg('add-to-cart', $wc_product_id, wc_get_checkout_url()) ); ?>"
-                   class="cbo-enroll-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
-                    Enrol Now
-                </a>
+		<!-- ENROL CARD -->
+		<div class="cbo__enrol-card">
+			<h3 class="cbo__enrol-title">Enrol in this Course</h3>
 
-                <?php else : ?>
-                <a href="#demo-form" class="cbo-enroll-btn cbo-enroll-btn--outline">
-                    Register Your Interest
-                </a>
-                <?php endif; ?>
+			<?php if ( ! empty( $vars_data ) ) : ?>
+			<div class="cbo__price-toggle">
+				<?php foreach ( $vars_data as $i => $v ) : ?>
+				<button class="cbo__toggle-btn<?php echo $i === 0 ? ' active' : ''; ?>"
+					data-html="<?php echo esc_attr( $v['price_html'] ); ?>"
+					data-period="<?php echo esc_attr( $v['period'] ); ?>"
+					data-url="<?php echo esc_url( $v['url'] ); ?>">
+					<?php echo esc_html( $v['label'] ); ?>
+				</button>
+				<?php endforeach; ?>
+			</div>
+			<div class="cbo__price-block">
+				<span class="cbo__price-amount" id="cboPriceVal"><?php echo wp_kses_post( $vars_data[0]['price_html'] ); ?></span>
+				<span class="cbo__price-period" id="cboPricePer">/ <?php echo esc_html( $vars_data[0]['period'] ); ?></span>
+			</div>
+			<p class="cbo__price-note" id="cboPriceNote">Pay one time – Save on yearly plan</p>
+			<a class="cbo__enrol-btn" id="cboEnrolBtn" href="<?php echo esc_url( $vars_data[0]['url'] ); ?>">🚀 Enrol Now</a>
 
-                <!-- Perks -->
-                <ul class="cbo-enroll-perks">
-                    <?php if ($unit_count) : ?><li><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Full access to all <?php echo $unit_count; ?> units</li><?php endif; ?>
-                    <li><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Live sessions + recordings</li>
-                    <li><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Certificate on completion</li>
-                </ul>
-            </div>
+			<?php elseif ( $is_free ) : ?>
+			<p class="cbo__price-free">✓ This course is FREE</p>
+			<a class="cbo__enrol-btn" href="<?php echo esc_url( get_permalink( $wc_id ) ); ?>">🚀 Enrol Free</a>
 
-            <!-- Course Explainer Video -->
-            <?php if ( $video_url || $thumb_url ) : ?>
-            <div class="cbo-sidebar-card">
-                <div class="cbo-sidebar-card__head">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#244092" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polygon points="10 8 16 11 10 14 10 8" fill="#244092" stroke="none"/></svg>
-                    Course Explainer
-                </div>
-                <div class="cbo-video-wrap">
-                    <?php if ($video_url) : ?>
-                        <iframe src="<?php echo esc_url(cb_embed($video_url)); ?>"
-                                frameborder="0" allowfullscreen loading="lazy"></iframe>
-                    <?php elseif ($thumb_url) : ?>
-                        <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr($title); ?>">
-                    <?php endif; ?>
-                </div>
-                <?php if ($video_url) : ?><p class="cbo-video-caption">Watch 3-min Course Overview</p><?php endif; ?>
-            </div>
-            <?php endif; ?>
+			<?php elseif ( $s_price ) : ?>
+			<div class="cbo__price-block">
+				<span class="cbo__price-amount"><?php echo wp_kses_post( $s_price ); ?></span>
+			</div>
+			<a class="cbo__enrol-btn" href="<?php echo esc_url( $s_url ); ?>">🚀 Enrol Now</a>
 
-            <!-- Register Demo Class -->
-            <div class="cbo-sidebar-card" id="demo-form">
-                <div class="cbo-sidebar-card__head">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#244092" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    Register for Demo Class
-                </div>
-                <p style="font-size:13px;color:#64748B;margin:0 0 14px">Join a free 30-minute demo class — no commitment required.</p>
-                <form class="cbo-demo-form" onsubmit="return false;">
-                    <div class="cbo-form-field">
-                        <label>Student Name</label>
-                        <input type="text" placeholder="e.g. Ayaan Rahman" class="cbo-input">
-                    </div>
-                    <div class="cbo-form-field">
-                        <label>Parent Phone Number</label>
-                        <input type="tel" placeholder="+880 1x xx xx xxxx" class="cbo-input">
-                    </div>
-                    <button type="submit" class="cbo-enroll-btn" style="margin-top:4px">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        Book My Free Demo
-                    </button>
-                </form>
-            </div>
+			<?php else : ?>
+			<a class="cbo__enrol-btn cbo__enrol-btn--ghost" href="#cbo-demo">Register Interest</a>
+			<?php endif; ?>
 
-            <!-- Batch Schedule -->
-            <div class="cbo-sidebar-card">
-                <div class="cbo-sidebar-card__head">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#244092" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Batch Schedule
-                </div>
-                <div class="cbo-schedule">
-                    <div class="cbo-schedule__col">
-                        <div class="cbo-schedule__label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            Morning
-                        </div>
-                        <div class="cbo-schedule__time">8:00 AM – 9:30 AM</div>
-                        <div class="cbo-schedule__time">9:00 AM – 9:30 AM</div>
-                        <div class="cbo-schedule__time">10:00 AM – 11:30 AM</div>
-                        <div class="cbo-schedule__time">11:00 AM – 11:30 AM</div>
-                    </div>
-                    <div class="cbo-schedule__col">
-                        <div class="cbo-schedule__label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                            Evening
-                        </div>
-                        <div class="cbo-schedule__time">4:00 PM – 4:30 PM</div>
-                        <div class="cbo-schedule__time">5:00 PM – 5:30 PM</div>
-                        <div class="cbo-schedule__time">6:00 PM – 8:30 PM</div>
-                        <div class="cbo-schedule__time">7:00 PM – 7:30 PM</div>
-                    </div>
-                </div>
-            </div>
+			<ul class="cbo__enrol-perks">
+				<?php if ( $unit_count ) : ?><li>✅ Full access to all <?php echo $unit_count; ?> units</li><?php endif; ?>
+				<li>✅ Live sessions + recordings</li>
+				<li>✅ Certificate on completion</li>
+			</ul>
+		</div>
 
-            <!-- 24/7 Card -->
-            <div class="cbo-247-card">
-                <div class="cbo-247-card__top">
-                    <span class="cbo-247-badge">24/7</span>
-                    <strong>Always Here For You</strong>
-                </div>
-                <ul class="cbo-247-list">
-                    <li>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.72a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/></svg>
-                        Parent helpline &amp; support
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Secure access to recordings
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
-                        Missed class recovery
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        Parent-teacher sessions
-                    </li>
-                    <li>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#A5B4FC" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        Learning progress tracking
-                    </li>
-                </ul>
-            </div>
+		<!-- COURSE EXPLAINER VIDEO (always shown between Enrol and Demo) -->
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">🎬</div>
+				<h3>Course Explainer</h3>
+			</div>
+			<div class="cbo__video-box">
+				<?php if ( $embed_url ) : ?>
+				<iframe src="<?php echo esc_url( $embed_url ); ?>" frameborder="0" allowfullscreen loading="lazy"></iframe>
+				<?php elseif ( $thumb ) : ?>
+				<img src="<?php echo esc_url( $thumb ); ?>" alt="" class="cbo__video-thumb">
+				<div class="cbo__play-overlay">
+					<div class="cbo__play-btn">
+						<svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M8 5v14l11-7z"/></svg>
+					</div>
+				</div>
+				<div class="cbo__video-label">Watch Course Overview</div>
+				<?php else : ?>
+				<div class="cbo__video-placeholder">
+					<div class="cbo__play-btn"><svg viewBox="0 0 24 24" fill="white" width="36" height="36"><path d="M8 5v14l11-7z"/></svg></div>
+					<p>Add a YouTube URL in the course editor to show the explainer video here.</p>
+				</div>
+				<?php endif; ?>
+			</div>
+		</div>
 
-        </div><!-- .cbo-sidebar -->
-    </div><!-- .cbo-layout -->
+		<!-- REGISTER DEMO CLASS -->
+		<div class="cbo__card" id="cbo-demo">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">📝</div>
+				<h3>Register for Demo Class</h3>
+			</div>
+			<p class="cbo__demo-sub">Join a free 30-minute demo class — no commitment required.</p>
+			<form onsubmit="cboDemoSubmit(event)">
+				<div class="cbo__form-group">
+					<label>Student Name</label>
+					<input type="text" placeholder="e.g. Ayaan Rahman" required>
+				</div>
+				<div class="cbo__form-group">
+					<label>Parent Phone Number</label>
+					<input type="tel" placeholder="+880 1X XX XX XXXX" required>
+				</div>
+				<button type="submit" class="cbo__enrol-btn" style="margin-top:4px">📅 Book My Free Demo</button>
+				<div class="cbo__form-ok" id="cboDemoOk">✓ We'll contact you shortly to confirm your demo!</div>
+			</form>
+		</div>
 
-    <!-- ── SIMILAR COURSES ───────────────────────────────────────────────────── -->
-    <?php if ( !empty($similar) ) : ?>
-    <div class="cbo-similar">
-        <div class="cbo-container">
-            <h2 class="cbo-similar__title">Similar Courses</h2>
-            <p class="cbo-similar__sub">Continue your child's learning journey</p>
-            <div class="cbo-similar-grid">
-                <?php foreach ($similar as $sc) :
-                    $sc_thumb    = get_the_post_thumbnail_url($sc->ID, 'medium') ?: '';
-                    $sc_subtitle = get_post_meta($sc->ID, '_cb_subtitle', true);
-                    $sc_duration = (int) get_post_meta($sc->ID, '_cb_duration_months', true);
-                    $sc_live     = (int) get_post_meta($sc->ID, '_cb_live_classes', true);
-                    $sc_units    = json_decode( get_post_meta($sc->ID, '_cb_course_content', true) ?: '[]', true );
-                    $sc_uc       = count(array_filter($sc_units, fn($u)=>!empty($u['title'])));
-                    $sc_terms    = wp_get_post_terms($sc->ID, 'cb_category');
-                    $sc_dept     = (!empty($sc_terms)&&!is_wp_error($sc_terms)) ? $sc_terms[0]->name : '';
-                    $sc_wc       = (int) get_post_meta($sc->ID, '_cb_wc_product_id', true);
-                    $sc_prod     = $sc_wc && function_exists('wc_get_product') ? wc_get_product($sc_wc) : null;
-                ?>
-                <div class="cbo-similar-card">
-                    <div class="cbo-similar-card__thumb">
-                        <?php if ($sc_thumb) : ?><img src="<?php echo esc_url($sc_thumb); ?>" alt=""><?php endif; ?>
-                        <?php if ($sc_dept) : ?><span class="cbo-similar-card__dept"><?php echo esc_html($sc_dept); ?></span><?php endif; ?>
-                    </div>
-                    <div class="cbo-similar-card__body">
-                        <div class="cbo-similar-card__meta">
-                            <?php if ($sc_live) : ?><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><?php echo $sc_live; ?> Live Class</span><?php endif; ?>
-                            <?php if ($sc_duration) : ?><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><?php echo $sc_duration; ?> Months</span><?php endif; ?>
-                        </div>
-                        <h4><a href="<?php echo get_permalink($sc->ID); ?>"><?php echo esc_html($sc->post_title); ?></a></h4>
-                        <?php if ($sc_subtitle) : ?><p><?php echo esc_html(wp_trim_words($sc_subtitle, 14)); ?></p><?php endif; ?>
-                        <a href="<?php echo get_permalink($sc->ID); ?>" class="cbo-learn-more">Learn More →</a>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
+		<!-- BATCH SCHEDULE -->
+		<div class="cbo__card">
+			<div class="cbo__card-header">
+				<div class="cbo__card-icon">🗓️</div>
+				<h3>Batch Schedule</h3>
+			</div>
+			<div class="cbo__schedule-grid">
+				<div>
+					<div class="cbo__schedule-heading cbo__schedule-heading--morning">☀️ Morning</div>
+					<div class="cbo__time-pill">8:00 AM – 8:30 AM</div>
+					<div class="cbo__time-pill">9:00 AM – 9:30 AM</div>
+					<div class="cbo__time-pill">10:00 AM – 10:30 AM</div>
+					<div class="cbo__time-pill">11:00 AM – 11:30 AM</div>
+				</div>
+				<div>
+					<div class="cbo__schedule-heading cbo__schedule-heading--evening">🌙 Evening</div>
+					<div class="cbo__time-pill">4:00 PM – 4:30 PM</div>
+					<div class="cbo__time-pill">5:00 PM – 5:30 PM</div>
+					<div class="cbo__time-pill">6:00 PM – 6:30 PM</div>
+					<div class="cbo__time-pill">7:00 PM – 7:30 PM</div>
+				</div>
+			</div>
+		</div>
 
-</div><!-- .cbo-page -->
+		<!-- 24/7 SUPPORT -->
+		<div class="cbo__support-card">
+			<div class="cbo__support-badge">24/7</div>
+			<h3>Always Here For You</h3>
+			<ul class="cbo__support-list">
+				<li><span class="cbo__s-icon">📞</span><span>Parent helpline &amp; support</span></li>
+				<li><span class="cbo__s-icon">🔐</span><span>Secure access to recordings</span></li>
+				<li><span class="cbo__s-icon">🔄</span><span>Missed class recovery</span></li>
+				<li><span class="cbo__s-icon">👨‍👩‍👧</span><span>Parent–teacher sessions</span></li>
+				<li><span class="cbo__s-icon">📈</span><span>Learning progress tracking</span></li>
+			</ul>
+		</div>
+
+	</div><!-- /sidebar -->
+
+</div><!-- .cbo__layout -->
+</div><!-- .cbo__container -->
+
+<!-- ══════════════════════  SIMILAR COURSES  ══════════════════════ -->
+<?php if ( ! empty( $similar ) ) :
+	$grads = [
+		'linear-gradient(175deg,#3a5bbf 0%,#244092 100%)',
+		'linear-gradient(175deg,#16b89e 0%,#0e8a7a 100%)',
+		'linear-gradient(175deg,#a865e0 0%,#7b3fbe 100%)',
+		'linear-gradient(175deg,#e05a4b 0%,#c0392b 100%)',
+	];
+?>
+<section class="cbo__similar">
+	<div class="cbo__container">
+		<div class="cbo__section-header">
+			<h2>Similar Courses</h2>
+			<p>Continue your child's learning journey</p>
+		</div>
+		<div class="cbo__similar-grid">
+			<?php foreach ( $similar as $idx => $sc ) :
+				$sc_thumb = get_the_post_thumbnail_url( $sc->ID, 'medium' ) ?: '';
+				$sc_sub   = get_post_meta( $sc->ID, '_cb_subtitle', true );
+				$sc_dur   = (int) get_post_meta( $sc->ID, '_cb_duration_months', true );
+				$sc_live  = (int) get_post_meta( $sc->ID, '_cb_live_classes', true );
+				$sc_terms = wp_get_post_terms( $sc->ID, 'cb_category' );
+				$sc_dept  = ( ! empty( $sc_terms ) && ! is_wp_error( $sc_terms ) ) ? $sc_terms[0]->name : '';
+			?>
+			<div class="cbo__course-card">
+				<div class="cbo__cc-hero" style="background:<?php echo esc_attr( $grads[ $idx % 4 ] ); ?>">
+					<?php if ( $sc_dept ) : ?>
+					<span class="cbo__cc-subject"><?php echo esc_html( $sc_dept ); ?></span>
+					<?php endif; ?>
+					<span class="cbo__cc-badge">Level <?php echo $idx + 2; ?></span>
+					<?php if ( $sc_thumb ) : ?>
+					<div class="cbo__cc-img"><img src="<?php echo esc_url( $sc_thumb ); ?>" alt=""></div>
+					<?php endif; ?>
+				</div>
+				<div class="cbo__cc-body">
+					<div class="cbo__cc-meta">
+						<?php if ( $sc_live ) : ?>
+						<span class="cbo__cc-meta-item">
+							<span class="cbo__cc-meta-icon cbo__cc-meta-icon--play">▶</span>
+							<span><strong><?php echo $sc_live; ?></strong> Live Class</span>
+						</span>
+						<?php endif; if ( $sc_dur ) : ?>
+						<span class="cbo__cc-meta-item">
+							<span class="cbo__cc-meta-icon cbo__cc-meta-icon--cal">📅</span>
+							<span>Duration<br><strong><?php echo $sc_dur; ?> Months</strong></span>
+						</span>
+						<?php endif; ?>
+					</div>
+					<h4 class="cbo__cc-title">
+						<a href="<?php echo get_permalink( $sc->ID ); ?>"><?php echo esc_html( $sc->post_title ); ?></a>
+					</h4>
+					<?php if ( $sc_sub ) : ?>
+					<p class="cbo__cc-desc"><?php echo esc_html( wp_trim_words( $sc_sub, 16 ) ); ?></p>
+					<?php endif; ?>
+					<a class="cbo__cc-more" href="<?php echo get_permalink( $sc->ID ); ?>">Learn More ↗</a>
+				</div>
+			</div>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
+</div><!-- .cbo -->
 
 <script>
+/* Price toggle */
 (function(){
-    var tabs  = document.querySelectorAll('.cbo-var-tab');
-    var price = document.getElementById('cbo-price');
-    var btn   = document.getElementById('cbo-enroll-btn');
-    if (!tabs.length) return;
-    tabs.forEach(function(tab){
-        tab.addEventListener('click', function(){
-            tabs.forEach(function(t){ t.classList.remove('active'); });
-            this.classList.add('active');
-            if (price) {
-                price.innerHTML = this.dataset.price +
-                    '<span class="cbo-price__period" id="cbo-period"> / '+ this.dataset.label +'</span>';
-            }
-            if (btn) btn.href = this.dataset.url;
-        });
-    });
+	var tabs = document.querySelectorAll('.cbo__toggle-btn');
+	if (!tabs.length) return;
+	tabs.forEach(function(tab){
+		tab.addEventListener('click', function(){
+			tabs.forEach(function(t){ t.classList.remove('active'); });
+			this.classList.add('active');
+			var pv  = document.getElementById('cboPriceVal');
+			var pp  = document.getElementById('cboPricePer');
+			var pn  = document.getElementById('cboPriceNote');
+			var btn = document.getElementById('cboEnrolBtn');
+			if (pv)  pv.innerHTML   = this.dataset.html;
+			if (pp)  pp.textContent = '/ ' + this.dataset.period;
+			if (btn) btn.href       = this.dataset.url;
+			if (pn)  pn.style.visibility = (this.dataset.period.indexOf('year') !== -1) ? 'visible' : 'hidden';
+		});
+	});
+})();
+
+/* Demo form */
+function cboDemoSubmit(e){
+	e.preventDefault();
+	var ok  = document.getElementById('cboDemoOk');
+	var btn = e.target.querySelector('button[type=submit]');
+	if (ok)  ok.style.display = 'block';
+	if (btn) btn.disabled     = true;
+}
+
+/* Scroll reveal */
+(function(){
+	if (!('IntersectionObserver' in window)) return;
+	var els = document.querySelectorAll('.cbo__card,.cbo__enrol-card,.cbo__support-card,.cbo__course-card');
+	els.forEach(function(el){
+		el.style.cssText += 'opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;';
+	});
+	var obs = new IntersectionObserver(function(entries){
+		entries.forEach(function(e){
+			if(e.isIntersecting){
+				e.target.style.opacity='1';
+				e.target.style.transform='translateY(0)';
+				obs.unobserve(e.target);
+			}
+		});
+	},{threshold:0.08});
+	els.forEach(function(el){ obs.observe(el); });
 })();
 </script>
-
 <?php get_footer(); ?>

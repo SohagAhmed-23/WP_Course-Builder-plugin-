@@ -109,12 +109,14 @@ class CPT_Courses {
         }
 
         // Meta fields
-        $meta_keys = [
-            'subtitle', 'wc_product_id', 'teacher_id', 'age_min', 'duration_months', 'live_classes', 'video_url', 'youtube_url',
-        ];
+        $url_keys  = [ 'video_url', 'youtube_url' ];
+        $meta_keys = [ 'subtitle', 'wc_product_id', 'teacher_id', 'age_min', 'duration_months', 'live_classes', 'video_url', 'youtube_url' ];
         foreach ( $meta_keys as $key ) {
             if ( isset( $data[ $key ] ) ) {
-                update_post_meta( $post_id, '_cb_' . $key, sanitize_text_field( $data[ $key ] ) );
+                $val = in_array( $key, $url_keys, true )
+                    ? esc_url_raw( $data[ $key ] )
+                    : sanitize_text_field( $data[ $key ] );
+                update_post_meta( $post_id, '_cb_' . $key, $val );
             }
         }
 
