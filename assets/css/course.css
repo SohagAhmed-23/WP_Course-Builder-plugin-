@@ -136,7 +136,7 @@
 }
 .cbo__card-header h2,
 .cbo__card-header h3 {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--primary);
   letter-spacing: -0.02em;
@@ -332,13 +332,13 @@
 
 /* Enrol button */
 .cbo__enrol-btn {
-  display: block; width: 100%;
-  background: var(--accent); color: white; border: none;
-  border-radius: var(--radius-sm); padding: 14px;
+  display: block; width: 100% !important;
+  background: var(--accent) !important; color: white; border: none;
+  border-radius: 10px  !important; padding: 14px;
   font-family: var(--font); font-size: 0.95rem; font-weight: 700;
   cursor: pointer; text-align: center; letter-spacing: 0.02em;
   transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  margin-bottom: 16px;
+  margin-bottom: 16px;;
   box-shadow: 0 4px 16px rgba(239,62,38,0.30);
   text-decoration: none;
 }
@@ -404,7 +404,7 @@
 }
 .cbo__form-group input {
   width: 100%; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 10px 14px;
+  border-radius: 10px !important; padding: 10px 14px;
   font-family: var(--font); font-size: 0.88rem; color: var(--text-dark);
   background: var(--bg); outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
