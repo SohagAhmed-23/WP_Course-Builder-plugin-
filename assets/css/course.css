@@ -57,23 +57,23 @@
 
 .cbo__breadcrumb {
   display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--text-muted); margin-bottom: 14px;
+  font-size: 24px; color: var(--text-muted); margin-bottom: 14px;
 }
 .cbo__breadcrumb a { color: var(--primary); }
 .cbo__breadcrumb a:hover { text-decoration: underline; }
 .cbo__breadcrumb svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
 
 .cbo__course-title {
-  font-size: 3rem;
+  font-size: 5rem !important;
   font-weight: 800;
   color: var(--primary);
   line-height: 1.2;
   margin-bottom: 8px;
   letter-spacing: -0.02em;
-  padding-top: 10px;
+  padding-top: 50px;
 }
 .cbo__course-tagline {
-  font-size: 0.88rem;
+  font-size: 1.5rem;
   color: var(--text-muted);
   margin-bottom: 16px;
 }
@@ -82,7 +82,7 @@
   background: #fff;
   border: 1px solid var(--border);
   color: var(--text-body);
-  font-size: 0.78rem;
+  font-size: 1.2rem;
   font-weight: 500;
   padding: 4px 14px;
   border-radius: var(--radius-pill);
@@ -127,7 +127,7 @@
   margin-bottom: 22px;
 }
 .cbo__card-icon {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   width: 46px; height: 46px;
   background: var(--primary-pale);
   border-radius: 12px;
@@ -136,7 +136,7 @@
 }
 .cbo__card-header h2,
 .cbo__card-header h3 {
-  font-size: 1.5rem;
+  font-size: 2.7rem !important;
   font-weight: 800;
   color: var(--primary);
   letter-spacing: -0.02em;
@@ -161,12 +161,12 @@
 }
 .cbo__styled-list li {
   display: flex; align-items: flex-start; gap: 10px;
-  font-size: 0.9rem; color: var(--text-body); line-height: 1.55;
+  font-size: 1.4rem !important; color: var(--text-body); line-height: 1.55;
 }
 .cbo__styled-list li::before {
   content: '▸';
   color: var(--accent);
-  font-size: 0.85rem;
+  font-size: 1.4rem ;
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -197,13 +197,13 @@
 }
 .cbo__unit-num {
   background: var(--primary); color: white;
-  font-size: 0.7rem; font-weight: 700;
+  font-size: 1rem; font-weight: 700;
   width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.cbo__unit-item strong { font-size: 0.82rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
-.cbo__unit-item p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+.cbo__unit-item strong { font-size: 1.4rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
+.cbo__unit-item p { font-size: 1.4rem; color: var(--text-muted); margin: 0; }
 
 /* ============================================================
    FEATURES GRID (Unique Features)
@@ -223,9 +223,9 @@
   transition: border-color var(--transition);
 }
 .cbo__feature-item:hover { border-color: var(--accent); }
-.cbo__feat-icon { font-size: 1.4rem; flex-shrink: 0; }
-.cbo__feature-item strong { font-size: 0.83rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
-.cbo__feature-item p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+.cbo__feat-icon { font-size: 2.5rem; flex-shrink: 0; }
+.cbo__feature-item strong { font-size: 1.66rem; color: var(--text-dark); display: block; margin-bottom: 3px; }
+.cbo__feature-item p { font-size: 1.3rem; color: var(--text-muted); margin: 0; }
 
 /* ============================================================
    INSTRUCTORS
@@ -264,8 +264,8 @@
   display: flex; align-items: center; justify-content: center;
   border: 2.5px solid var(--primary);
 }
-.cbo__instructor-info strong { display: block; font-size: 0.8rem; color: var(--text-dark); margin-bottom: 2px; }
-.cbo__instructor-info span   { font-size: 0.72rem; color: var(--text-muted); }
+.cbo__instructor-info strong { display: block; font-size: 1.6rem; color: var(--text-dark); margin-bottom: 2px; }
+.cbo__instructor-info span   { font-size: 1.44rem; color: var(--text-muted); }
 
 /* ============================================================
    RIGHT SIDEBAR
@@ -284,8 +284,14 @@
 .cbo__enrol-card:hover {
   box-shadow: var(--shadow-inset), var(--shadow-hover);
 }
-.cbo__enrol-title {
-  font-size: 1.1rem; font-weight: 700;
+.cbo__enrol-title  {
+  font-size: 2.4rem !important; 
+  font-weight: 700;
+  color: #244092 !important; margin-bottom: 18px;
+}
+.cbo__enrol-card h3 {
+  font-size: 2.4rem !important;
+  font-weight: 700;
   color: var(--text-dark); margin-bottom: 18px;
 }
 
@@ -300,7 +306,7 @@
   flex: 1; padding: 8px 0;
   border: none; border-radius: var(--radius-pill);
   background: transparent; font-family: var(--font);
-  font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+  font-size: 1.7rem; font-weight: 600; color: var(--text-muted);
   cursor: pointer; transition: background var(--transition), color var(--transition);
 }
 .cbo__toggle-btn.active {
@@ -313,19 +319,19 @@
   display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px;
 }
 .cbo__price-amount {
-  font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1;
+  font-size: 2.5rem; font-weight: 800; color: var(--primary); line-height: 1;
 }
 .cbo__price-amount .woocommerce-Price-amount,
-.cbo__price-amount .amount { font-size: inherit; color: inherit; font-weight: inherit; }
-.cbo__price-period { font-size: 0.9rem; color: var(--text-muted); }
+.cbo__price-amount .amount { font-size: 3rem; color: inherit; font-weight: inherit; }
+.cbo__price-period { font-size: 2.5rem !important; color: var(--text-muted); }
 .cbo__price-note {
-  font-size: 0.8rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
+  font-size: 1.6rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
   background: #f0fdf4; padding: 6px 12px; border-radius: var(--radius-sm);
   border: 1px solid #bbf7d0; visibility: hidden;
 }
 .cbo__price-note.visible { visibility: visible; }
 .cbo__price-free {
-  font-size: 0.8rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
+  font-size: 1.6rem; color: #16a34a; font-weight: 600; margin-bottom: 18px;
   background: #f0fdf4; padding: 6px 12px; border-radius: var(--radius-sm);
   border: 1px solid #bbf7d0;
 }
@@ -334,8 +340,8 @@
 .cbo__enrol-btn {
   display: block; width: 100% !important;
   background: var(--accent) !important; color: white; border: none;
-  border-radius: 10px  !important; padding: 14px;
-  font-family: var(--font); font-size: 0.95rem; font-weight: 700;
+  border-radius: 10px  !important; padding: 14px !important;
+  font-family: var(--font); font-size: 1.5rem !important; font-weight: 700;
   cursor: pointer; text-align: center; letter-spacing: 0.02em;
   transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   margin-bottom: 16px;;
@@ -355,7 +361,7 @@
 
 /* Perks */
 .cbo__enrol-perks { display: flex; flex-direction: column; gap: 8px; }
-.cbo__enrol-perks li { font-size: 0.83rem; color: var(--text-body); }
+.cbo__enrol-perks li { font-size: 1.66rem; color: var(--text-body); }
 
 /* ---- VIDEO CARD ---- */
 .cbo__video-box {
@@ -389,23 +395,24 @@
 .cbo__video-label {
   position: absolute; bottom: 0; left: 0; right: 0;
   background: linear-gradient(transparent, rgba(15,31,80,0.8));
-  color: rgba(255,255,255,0.88); font-size: 0.78rem; font-weight: 500;
+  color: rgba(255,255,255,0.88); font-size: 1.56rem; font-weight: 500;
   padding: 20px 12px 10px; text-align: center;
 }
 
 /* ---- DEMO FORM ---- */
 .cbo__demo-sub {
-  font-size: 0.83rem; color: var(--text-muted); margin-bottom: 18px;
+  font-size: 1.3rem; color: var(--text-muted); margin-bottom: 18px;
 }
 .cbo__form-group { margin-bottom: 14px; }
 .cbo__form-group label {
-  display: block; font-size: 0.8rem; font-weight: 600;
+  display: block; font-size: 1.6rem; font-weight: 600;
   color: var(--text-dark); margin-bottom: 6px;
 }
 .cbo__form-group input {
   width: 100%; border: 1.5px solid var(--border);
+  height: 45px !important;
   border-radius: 10px !important; padding: 10px 14px;
-  font-family: var(--font); font-size: 0.88rem; color: var(--text-dark);
+  font-family: var(--font); font-size: 1.76rem; color: var(--text-dark);
   background: var(--bg); outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
@@ -417,7 +424,7 @@
 .cbo__form-ok {
   margin-top: 10px; background: #f0fdf4; color: #16a34a;
   border-radius: var(--radius-sm); padding: 10px 12px;
-  font-size: 0.83rem; font-weight: 600; text-align: center; display: none;
+  font-size: 1.66rem; font-weight: 600; text-align: center; display: none;
   border: 1px solid #bbf7d0;
 }
 
@@ -425,7 +432,7 @@
 .cbo__schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width:600px) { .cbo__schedule-grid { grid-template-columns: 1fr; } }
 .cbo__schedule-heading {
-  font-size: 0.82rem; font-weight: 700; color: var(--text-dark);
+  font-size: 1.64rem; font-weight: 700; color: var(--text-dark);
   margin-bottom: 10px;
 }
 .cbo__schedule-heading--morning { color: #b45309; }
@@ -433,7 +440,7 @@
 .cbo__time-pill {
   display: block; background: var(--bg);
   border: 1.5px solid var(--border); border-radius: var(--radius-pill);
-  padding: 7px 12px; font-size: 0.76rem; font-weight: 600;
+  padding: 7px 12px; font-size: 1.3rem; font-weight: 600;
   color: var(--text-body); text-align: center; margin-bottom: 8px;
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
@@ -468,7 +475,7 @@
 .cbo__support-list { display: flex; flex-direction: column; gap: 12px; }
 .cbo__support-list li {
   display: flex; align-items: center; gap: 10px;
-  font-size: 0.85rem; color: rgba(255,255,255,0.82);
+  font-size: 1.7rem; color: rgba(255,255,255,0.82);
 }
 .cbo__s-icon {
   width: 32px; height: 32px;
@@ -481,15 +488,14 @@
    SIMILAR COURSES SECTION
    ============================================================ */
 .cbo__similar {
-  background: #fff;
-  border-top: 1px solid rgba(36,64,146,0.10);
+  
   padding: 52px 0 60px;
 }
 .cbo__section-header { margin-bottom: 28px; }
 .cbo__section-header h2 {
-  font-size: 1.6rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px;
+  font-size: 3.6rem; font-weight: 800; color: #244092; margin-bottom: 4px;
 }
-.cbo__section-header p { font-size: 0.9rem; color: var(--text-muted); }
+.cbo__section-header p { font-size: 1.8rem; color: var(--text-muted); }
 
 .cbo__similar-grid {
   display: grid; grid-template-columns: repeat(4,1fr); gap: 22px;
@@ -516,13 +522,13 @@
 .cbo__cc-subject {
   position: relative; z-index: 3;
   display: inline-block; color: #fff;
-  font-size: 0.9rem; font-weight: 800;
+  font-size: 1.8rem; font-weight: 800;
   text-shadow: 0 1px 6px rgba(0,0,0,0.25);
 }
 .cbo__cc-badge {
   position: absolute; top: 14px; right: 14px; z-index: 4;
   background: #ffd166; color: #1a2340;
-  font-size: 0.82rem; font-weight: 900;
+  font-size: 1.64rem; font-weight: 900;
   padding: 4px 12px; border-radius: 7px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.18);
 }
@@ -534,8 +540,8 @@
 .cbo__course-card:hover .cbo__cc-img img { transform: scale(1.06); }
 .cbo__cc-body { padding: 14px 16px 18px; background: #fff; display: flex; flex-direction: column; gap: 7px; flex: 1; }
 .cbo__cc-meta { display: flex; align-items: flex-start; gap: 20px; }
-.cbo__cc-meta-item { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; color: var(--text-body); line-height: 1.4; }
-.cbo__cc-meta-item strong { display: block; font-weight: 700; color: var(--text-dark); font-size: 0.8rem; }
+.cbo__cc-meta-item { display: flex; align-items: center; gap: 7px; font-size: 1.5rem; color: var(--text-body); line-height: 1.4; }
+.cbo__cc-meta-item strong { display: block; font-weight: 700; color: var(--text-dark); font-size: 1.6rem; }
 .cbo__cc-meta-icon {
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -543,10 +549,10 @@
 .cbo__cc-meta-icon--play { background: rgba(239,62,38,0.12); color: var(--accent); font-size: 0.65rem; padding-left: 2px; }
 .cbo__cc-meta-icon--cal  { background: rgba(36,64,146,0.10); color: var(--primary); font-size: 0.75rem; }
 .cbo__cc-title { font-size: 1rem; font-weight: 800; color: var(--accent); line-height: 1.2; margin: 0; }
-.cbo__cc-desc  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.cbo__cc-desc  { font-size: 1.56rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
 .cbo__cc-more  {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.82rem; font-weight: 700; color: var(--primary);
+  font-size: 1.64rem; font-weight: 700; color: var(--primary);
   transition: color var(--transition), gap var(--transition);
 }
 .cbo__cc-more:hover { color: var(--accent); gap: 9px; }
@@ -581,7 +587,7 @@
 }
 .cbo__video-placeholder p {
   color: rgba(255,255,255,0.6);
-  font-size: 0.78rem;
+  font-size: 1.56rem;
   text-align: center;
   margin: 0;
   line-height: 1.5;
@@ -734,12 +740,12 @@
 .cbo__instructor-overlay {
     position: absolute; inset: 0; border-radius: 50%;
     background: rgba(36,64,146,.75); color: #fff;
-    font-size: .68rem; font-weight: 600;
+    font-size: 1.36rem; font-weight: 600;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transition: opacity .2s;
 }
 .cbo__instructor-card--link:hover .cbo__instructor-overlay { opacity: 1; }
 .cbo__instructor-info { text-align: center; }
-.cbo__instructor-info strong { display: block; font-size: .88rem; font-weight: 700; color: #1e293b; }
-.cbo__instructor-desig { display: block; font-size: .72rem; color: #EF3E26; font-weight: 500; margin-top: 3px; }
-.cbo__instructor-bio { font-size: .72rem; color: #64748b; margin-top: 5px; line-height: 1.5; }
+.cbo__instructor-info strong { display: block; font-size: 1.76rem; font-weight: 700; color: #1e293b; }
+.cbo__instructor-desig { display: block; font-size: 1.44rem; color: #EF3E26; font-weight: 500; margin-top: 3px; }
+.cbo__instructor-bio { font-size: 1.44rem; color: #64748b; margin-top: 5px; line-height: 1.5; }

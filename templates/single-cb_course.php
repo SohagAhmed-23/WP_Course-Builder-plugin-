@@ -103,16 +103,7 @@ get_header();
 <section class="cbo__hero">
 	<div class="cbo__container">
 
-		<?php if ( $dept_name ) : ?>
-		<nav class="cbo__breadcrumb">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Home</a>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-			<a href="#">Courses</a>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-			<span><?php echo esc_html( $dept_name ); ?></span>
-		</nav>
-		<?php endif; ?>
-
+		
 		<h1 class="cbo__course-title"><?php echo esc_html( $title ); ?></h1>
 
 		<?php if ( $subtitle ) : ?>
