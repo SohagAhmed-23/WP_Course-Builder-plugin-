@@ -375,6 +375,13 @@
                 if (d.age_min) $('#cb-age-min').val(d.age_min);
                 if (d.duration_months) $('#cb-duration').val(d.duration_months);
                 if (d.live_classes)    $('#cb-live-classes').val(d.live_classes);
+                // Featured image
+                if (d.featured_image_id) {
+                    $('#cb-featured-image-id').val(d.featured_image_id);
+                    $('#cb-featured-image-img').attr('src', d.featured_image_url);
+                    $('#cb-featured-image-preview').show();
+                    $('#cb-featured-image-remove').show();
+                }
             });
         } else {
             loadProducts();
@@ -441,6 +448,7 @@
                 video_url:           $('#cb-video-url').val(),
                 duration_months:     $('#cb-duration').val(),
                 live_classes:        $('#cb-live-classes').val(),
+                featured_image_id:   parseInt($('#cb-featured-image-id').val()) || 0,
             };
 
             // Append as array data
@@ -465,10 +473,20 @@
                     Toast.show(res.data.message, 'success');
                     // Show / update preview button immediately after save
                     if (res.data.id && res.data.permalink) {
-                        const $pw  = $('#cb-preview-wrap');
-                        const $pb  = $('#cb-preview-btn');
-                        $pb.attr('href', res.data.permalink);
-                        $pw.show();
+                        // Sidebar preview wrap
+                        const $pw = $('#cb-preview-wrap');
+                        const $pb = $('#cb-preview-btn');
+                        if ($pb.length) { $pb.attr('href', res.data.permalink); $pw.show(); }
+                        // Header preview button — inject for new courses, update for edits
+                        if (!$('#cb-preview-btn-header').length) {
+                            const $back = $('.cb-page-header .cb-btn--ghost').first();
+                            $('<a target="_blank" id="cb-preview-btn-header" class="cb-preview-btn"></a>')
+                                .attr('href', res.data.permalink)
+                                .html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Preview')
+                                .insertBefore($back);
+                        } else {
+                            $('#cb-preview-btn-header').attr('href', res.data.permalink);
+                        }
                     }
                     if (!editId) {
                         setTimeout(() => {
@@ -481,6 +499,36 @@
                     Toast.show(res.data.message || 'Save failed.', 'error');
                 }
             });
+        });
+    }
+
+    // ── Featured Image Media Uploader ────────────────────────────────────────
+    if ($('#cb-featured-image-btn').length) {
+        let featuredFrame;
+
+        $('#cb-featured-image-btn').on('click', function () {
+            if (featuredFrame) { featuredFrame.open(); return; }
+            featuredFrame = wp.media({
+                title: 'Select Featured Image',
+                button: { text: 'Set Featured Image' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            featuredFrame.on('select', function () {
+                const attachment = featuredFrame.state().get('selection').first().toJSON();
+                $('#cb-featured-image-id').val(attachment.id);
+                $('#cb-featured-image-img').attr('src', attachment.url);
+                $('#cb-featured-image-preview').show();
+                $('#cb-featured-image-remove').show();
+            });
+            featuredFrame.open();
+        });
+
+        $('#cb-featured-image-remove').on('click', function () {
+            $('#cb-featured-image-id').val('-1'); // -1 = explicitly removed
+            $('#cb-featured-image-img').attr('src', '');
+            $('#cb-featured-image-preview').hide();
+            $(this).hide();
         });
     }
 

@@ -133,6 +133,17 @@ class CPT_Courses {
             wp_set_post_terms( $post_id, [ absint( $data['category_id'] ) ], 'cb_category' );
         }
 
+        // Featured image — only update if explicitly provided (> 0)
+        // Never wipe existing thumbnail just because field was empty
+        if ( ! empty( $data['featured_image_id'] ) && $data['featured_image_id'] > 0 ) {
+            set_post_thumbnail( $post_id, (int) $data['featured_image_id'] );
+            update_post_meta( $post_id, '_cb_photo_id', (int) $data['featured_image_id'] );
+        } elseif ( isset( $data['featured_image_id'] ) && $data['featured_image_id'] === -1 ) {
+            // -1 means explicitly removed by user
+            delete_post_thumbnail( $post_id );
+            delete_post_meta( $post_id, '_cb_photo_id' );
+        }
+
         return $post_id;
     }
 }

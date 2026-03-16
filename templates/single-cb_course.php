@@ -14,6 +14,11 @@ $live      = (int) get_post_meta( $cid, '_cb_live_classes',    true );
 $wc_id     = (int) get_post_meta( $cid, '_cb_wc_product_id',   true );
 $video_url = get_post_meta( $cid, '_cb_video_url', true );
 $thumb     = get_the_post_thumbnail_url( $cid, 'large' ) ?: '';
+// Fallback: if no post thumbnail, try _cb_photo_id (legacy meta)
+if ( ! $thumb ) {
+	$_cb_pid = (int) get_post_meta( $cid, '_cb_photo_id', true );
+	if ( $_cb_pid ) $thumb = wp_get_attachment_image_url( $_cb_pid, 'large' ) ?: '';
+}
 
 $objectives = array_values( array_filter( (array) json_decode( get_post_meta( $cid, '_cb_learning_objectives', true ) ?: '[]', true ), 'trim' ) );
 $overview   = array_values( array_filter( (array) json_decode( get_post_meta( $cid, '_cb_programme_overview',  true ) ?: '[]', true ), 'trim' ) );
@@ -224,24 +229,24 @@ get_header();
 			</div>
 			<div class="cbo__instructors-grid">
 				<?php foreach ( $dept_teachers as $t ) :
-					$pid   = (int) get_post_meta( $t->ID, '_cb_photo_id', true );
-					$photo = $pid ? wp_get_attachment_image_url( $pid, 'thumbnail' ) : '';
-					$desig = get_post_meta( $t->ID, '_cb_designation', true );
-					$parts = explode( ' ', trim( $t->post_title ) );
-					$ini   = strtoupper( ( $parts[0][0] ?? '' ) . ( end( $parts )[0] ?? '' ) );
-					$teacher_url = get_permalink( $t->ID );
+					$pid       = (int) get_post_meta( $t->ID, '_cb_photo_id', true );
+					$photo     = $pid ? wp_get_attachment_image_url( $pid, 'medium' ) : '';
+					$desig     = get_post_meta( $t->ID, '_cb_designation', true );
+					$parts     = explode( ' ', trim( $t->post_title ) );
+					$ini       = strtoupper( ( $parts[0][0] ?? '' ) . ( end( $parts )[0] ?? '' ) );
 				?>
-				<a href="<?php echo esc_url( $teacher_url ); ?>" style="text-decoration:none;color:inherit;" class="cbo__instructor-card">
+				<a href="<?php echo esc_url( get_permalink( $t->ID ) ); ?>" class="cbo__instructor-card cbo__instructor-card--link">
 					<div class="cbo__instructor-img-wrap">
 						<?php if ( $photo ) : ?>
 						<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $t->post_title ); ?>">
 						<?php else : ?>
-						<div class="cbo__instructor-ini" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#244092,#3558c0);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;"><?php echo esc_html( $ini ); ?></div>
+						<div class="cbo__instructor-ini"><?php echo esc_html( $ini ); ?></div>
 						<?php endif; ?>
+						<div class="cbo__instructor-overlay"><span>View Profile →</span></div>
 					</div>
 					<div class="cbo__instructor-info">
 						<strong><?php echo esc_html( $t->post_title ); ?></strong>
-						<?php if ( $desig ) : ?><span><?php echo esc_html( $desig ); ?></span><?php endif; ?>
+						<?php if ( $desig ) : ?><span class="cbo__instructor-desig"><?php echo esc_html( $desig ); ?></span><?php endif; ?>
 					</div>
 				</a>
 				<?php endforeach; ?>

@@ -298,46 +298,91 @@ get_header();
         .tp-bio p { margin-bottom: 12px; }
         .tp-bio p:last-child { margin-bottom: 0; }
 
-        /* ── Courses ── */
-        .tp-courses { display: flex; flex-direction: column; gap: 12px; }
+        /* ── Courses grid (big card design) ── */
+        .tp-courses {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+        }
         .tp-course-card {
-            display: flex; gap: 16px; align-items: center;
-            padding: 14px 16px; border-radius: 14px;
-            border: 1.5px solid #e2e8f0; text-decoration: none;
             background: #fff;
-            transition: border-color .25s, box-shadow .25s, transform .25s;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border-right: 3px solid #EF3E26;
+            border-bottom: 3px solid #EF3E26;
+            box-shadow: 0 10px 20px rgba(0,0,0,.12);
+            transition: transform .28s ease, box-shadow .28s ease;
+            text-decoration: none;
+            display: block;
         }
-        .tp-course-card:hover {
-            border-color: #2748b5;
-            box-shadow: 0 6px 24px rgba(36,64,146,.14);
-            transform: translateY(-3px);
+        .tp-course-card::before {
+            content: "";
+            position: absolute; inset: 0;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 3;
+            box-shadow:
+                inset 0 18px 30px -22px #244092,
+                inset 0 -18px 30px -28px #244092,
+                inset 12px 0 24px -28px #244092,
+                inset -12px 0 24px -28px #244092;
         }
-        .tp-course-card__thumb {
-            width: 76px; height: 58px;
-            border-radius: 10px; object-fit: cover;
-            background: #eef2ff; flex-shrink: 0;
+        .tp-course-card:hover { box-shadow: 0 18px 36px rgba(0,0,0,.18); transform: translateY(-6px); }
+        .tp-course-card:hover .tp-course-card__content { transform: translateY(-6px); transition: transform .22s ease; }
+        .tp-course-card:hover .tp-course-card__title,
+        .tp-course-card:hover .tp-course-card__learn { color: #EF3E26 !important; transition: color .22s ease; }
+
+        .tp-course-card__link { position: relative; z-index: 2; display: block; }
+        .tp-course-card__image {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 9px 9px 0 0;
         }
-        .tp-course-card__thumb-placeholder {
-            width: 76px; height: 58px;
-            border-radius: 10px;
+        .tp-course-card__image-placeholder {
+            height: 220px;
             background: linear-gradient(135deg, #eef2ff, #c7d2fe);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem;
+            border-radius: 9px 9px 0 0;
+        }
+        .tp-course-card__content {
+            padding: 16px;
+            background: #fff;
+            display: flex; flex-direction: column;
+        }
+        .tp-course-card__meta-row {
             display: flex; align-items: center;
-            justify-content: center;
-            font-size: 1.5rem; flex-shrink: 0;
+            gap: 1.4rem; margin-bottom: 10px;
+            font-family: system-ui;
         }
-        .tp-course-card__info { flex: 1; min-width: 0; }
+        .tp-course-card__meta-item {
+            display: flex; align-items: center; gap: 8px;
+            color: #244092; font-weight: 700; font-size: 13px;
+        }
+        .tp-course-card__meta-icon {
+            width: 36px; height: 35px; flex-shrink: 0;
+        }
+        .tp-course-card__meta-label { font-size: 13px; font-weight: 700; color: #244092; }
         .tp-course-card__title {
-            font-size: .9rem; font-weight: 700;
-            color: #1e293b; white-space: nowrap;
-            overflow: hidden; text-overflow: ellipsis;
+            font-size: 1.1rem; font-weight: 700;
+            color: #244092; margin: 4px 0 6px;
+            line-height: 1.3;
         }
-        .tp-course-card__meta { font-size: .74rem; color: #94a3b8; margin-top: 4px; font-weight: 500; }
-        .tp-course-card__arrow {
-            color: #cbd5e1; font-size: 1.2rem;
-            flex-shrink: 0;
-            transition: color .2s, transform .2s;
+        .tp-course-card__excerpt {
+            color: #000; font-weight: 400;
+            font-size: .88rem; line-height: 1.4;
+            margin: 0 0 12px;
         }
-        .tp-course-card:hover .tp-course-card__arrow { color: #2748b5; transform: translateX(4px); }
+        .tp-course-card__learn {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #EF3E26; font-weight: 700; font-size: 1rem;
+            margin-top: auto;
+        }
+        @media (max-width: 600px) {
+            .tp-courses { grid-template-columns: 1fr; }
+        }
 
         /* ── Sidebar Info ── */
         .tp-info-list { display: flex; flex-direction: column; gap: 16px; }
@@ -473,21 +518,6 @@ get_header();
         <div class="tp-hero__wave"></div>
     </div>
 
-    <!-- ── Stats ── -->
-    <div class="tp-stats">
-        <div class="tp-stat">
-            <div class="tp-stat__num"><?php echo count( $courses ); ?></div>
-            <div class="tp-stat__label">Courses</div>
-        </div>
-        <div class="tp-stat">
-            <div class="tp-stat__num"><?php echo count( $cat_names ) ?: '—'; ?></div>
-            <div class="tp-stat__label">Departments</div>
-        </div>
-        <div class="tp-stat">
-            <div class="tp-stat__num"><?php echo get_the_date( 'Y', $teacher ); ?></div>
-            <div class="tp-stat__label">Joined</div>
-        </div>
-    </div>
 
     <!-- ── Body ── -->
     <div class="tp-body">
@@ -505,47 +535,7 @@ get_header();
             </div>
             <?php endif; ?>
 
-            <div class="tp-card tp-reveal tp-reveal-delay-1">
-                <div class="tp-card__header">
-                    <div class="tp-card__icon">📚</div>
-                    <h2 class="tp-card__title">Courses by <?php echo esc_html( $teacher->post_title ); ?></h2>
-                </div>
-                <?php if ( $courses ) : ?>
-                <div class="tp-courses">
-                    <?php foreach ( $courses as $co ) :
-                        $thumb      = get_the_post_thumbnail_url( $co->ID, 'thumbnail' );
-                        $age        = get_post_meta( $co->ID, '_cb_age_min', true );
-                        $dur        = get_post_meta( $co->ID, '_cb_duration_months', true );
-                        $sub        = get_post_meta( $co->ID, '_cb_subtitle', true );
-                        $meta_parts = array_filter( [
-                            $age ? 'Age ' . $age . '+' : '',
-                            $dur ? $dur . ' months'    : '',
-                            $sub ?: '',
-                        ] );
-                    ?>
-                    <a href="<?php echo esc_url( get_permalink( $co->ID ) ); ?>" class="tp-course-card">
-                        <?php if ( $thumb ) : ?>
-                            <img src="<?php echo esc_url( $thumb ); ?>" alt="" class="tp-course-card__thumb">
-                        <?php else : ?>
-                            <div class="tp-course-card__thumb-placeholder">📘</div>
-                        <?php endif; ?>
-                        <div class="tp-course-card__info">
-                            <div class="tp-course-card__title"><?php echo esc_html( $co->post_title ); ?></div>
-                            <?php if ( $meta_parts ) : ?>
-                                <div class="tp-course-card__meta"><?php echo esc_html( implode( ' · ', $meta_parts ) ); ?></div>
-                            <?php endif; ?>
-                        </div>
-                        <span class="tp-course-card__arrow">→</span>
-                    </a>
-                    <?php endforeach; ?>
-                </div>
-                <?php else : ?>
-                <div class="tp-empty">
-                    <div class="tp-empty-icon">📭</div>
-                    No courses assigned yet.
-                </div>
-                <?php endif; ?>
-            </div>
+
 
         </div>
 
@@ -582,14 +572,7 @@ get_header();
                         </div>
                     </div>
                     <?php endif; ?>
-                    <div class="tp-info-row">
-                        <div class="tp-info-icon">📚</div>
-                        <div>
-                            <div class="tp-info-label">Total Courses</div>
-                            <div class="tp-info-value"><?php echo count( $courses ); ?> Course<?php echo count( $courses ) !== 1 ? 's' : ''; ?></div>
-                        </div>
-                    </div>
-                   
+
                 </div>
             </div>
         </div>

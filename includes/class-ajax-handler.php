@@ -141,6 +141,8 @@ class Ajax_Handler {
             'youtube_url'         => get_post_meta( $post->ID, '_cb_youtube_url', true ),
             'duration_months'     => get_post_meta( $post->ID, '_cb_duration_months', true ),
             'live_classes'        => get_post_meta( $post->ID, '_cb_live_classes', true ),
+            'featured_image_id'   => (int) get_post_thumbnail_id( $post->ID ),
+            'featured_image_url'  => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
         ] );
     }
 
@@ -158,6 +160,7 @@ class Ajax_Handler {
             'youtube_url'         => esc_url_raw( $_POST['youtube_url'] ?? '' ),
             'duration_months'     => absint( $_POST['duration_months'] ?? 0 ),
             'live_classes'        => absint( $_POST['live_classes'] ?? 0 ),
+            'featured_image_id'   => intval( $_POST['featured_image_id'] ?? 0 ),
             'learning_objectives' => $this->sanitize_array( $_POST['learning_objectives'] ?? [] ),
             'programme_overview'  => $this->sanitize_array( $_POST['programme_overview'] ?? [] ),
             'course_content'      => $this->sanitize_nested( $_POST['course_content'] ?? [] ),
