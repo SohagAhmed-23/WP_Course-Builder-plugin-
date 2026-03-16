@@ -3,7 +3,7 @@
  * Plugin Name:       Course Builder
  * Plugin URI:        https://example.com/course-builder
  * Description:       A modern, modular course management system for WordPress with full admin UI, AJAX-powered CRUD, WooCommerce integration, and a clean dashboard.
- * Version:           1.2.3
+ * Version:           1.3.0
  * Author:            Course Builder Team
  * Author URI:        https://example.com
  * License:           GPL v2 or later
@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // ── Plugin constants ──────────────────────────────────────────────────────────
-define( 'CB_VERSION',     '1.2.3' );
+define( 'CB_VERSION',     '1.3.0' );
 define( 'CB_PLUGIN_FILE', __FILE__ );
 define( 'CB_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'CB_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );

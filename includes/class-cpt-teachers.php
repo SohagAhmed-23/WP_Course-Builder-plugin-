@@ -9,11 +9,13 @@ class CPT_Teachers {
         register_post_type( 'cb_teacher', [
             'label'           => __( 'Teachers', 'course-builder' ),
             'labels'          => self::labels(),
-            'public'          => false,
+            'public'          => true,
             'show_ui'         => false,
             'show_in_menu'    => false,
             'show_in_rest'    => true,
             'supports'        => [ 'title', 'editor', 'thumbnail', 'custom-fields' ],
+            'has_archive'     => false,
+            'rewrite'         => [ 'slug' => 'teacher' ],
             'capability_type' => 'post',
             'map_meta_cap'    => true,
         ] );

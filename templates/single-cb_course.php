@@ -229,8 +229,9 @@ get_header();
 					$desig = get_post_meta( $t->ID, '_cb_designation', true );
 					$parts = explode( ' ', trim( $t->post_title ) );
 					$ini   = strtoupper( ( $parts[0][0] ?? '' ) . ( end( $parts )[0] ?? '' ) );
+					$teacher_url = get_permalink( $t->ID );
 				?>
-				<div class="cbo__instructor-card">
+				<a href="<?php echo esc_url( $teacher_url ); ?>" style="text-decoration:none;color:inherit;" class="cbo__instructor-card">
 					<div class="cbo__instructor-img-wrap">
 						<?php if ( $photo ) : ?>
 						<img src="<?php echo esc_url( $photo ); ?>" alt="<?php echo esc_attr( $t->post_title ); ?>">
@@ -242,7 +243,7 @@ get_header();
 						<strong><?php echo esc_html( $t->post_title ); ?></strong>
 						<?php if ( $desig ) : ?><span><?php echo esc_html( $desig ); ?></span><?php endif; ?>
 					</div>
-				</div>
+				</a>
 				<?php endforeach; ?>
 			</div>
 		</div>

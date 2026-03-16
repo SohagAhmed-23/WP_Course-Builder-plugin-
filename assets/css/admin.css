@@ -1195,3 +1195,7 @@
     background: #e2e8f0;
     color: #475569;
 }
+
+/* Teacher name as link */
+.cb-teacher-name-link { text-decoration: none; }
+.cb-teacher-name-link:hover .cb-teacher-name { color: var(--cb-primary); text-decoration: underline; }
