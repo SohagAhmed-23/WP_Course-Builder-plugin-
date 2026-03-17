@@ -77,6 +77,36 @@ get_header();
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+        /* ── Photo pulse / aura animations ── */
+        @keyframes photoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-10px); }
+        }
+        @keyframes pulseRing {
+            0%   { transform: scale(.92); opacity: .55; }
+            70%  { transform: scale(1.15); opacity: 0; }
+            100% { transform: scale(1.15); opacity: 0; }
+        }
+        @keyframes pulseRing2 {
+            0%   { transform: scale(.88); opacity: .40; }
+            70%  { transform: scale(1.22); opacity: 0; }
+            100% { transform: scale(1.22); opacity: 0; }
+        }
+        @keyframes pulseRing3 {
+            0%   { transform: scale(.84); opacity: .25; }
+            70%  { transform: scale(1.30); opacity: 0; }
+            100% { transform: scale(1.30); opacity: 0; }
+        }
+
+        @keyframes badgeBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            40%      { transform: translateY(-6px) scale(1.08); }
+            60%      { transform: translateY(-3px) scale(1.04); }
+        }
+        @keyframes shineSwipe {
+            0%   { left: -80%; }
+            100% { left: 130%; }
+        }
 
         /* ══════════════════════════════════════
            HERO
@@ -131,10 +161,43 @@ get_header();
             z-index: 1;
         }
 
-        /* Photo */
+        /* ── Photo aura / pulse wrapper ── */
         .tp-hero__photo-wrap {
             flex-shrink: 0;
+            position: relative;
             animation: photoReveal .8s cubic-bezier(.22,1,.36,1) .1s both;
+        }
+
+        /* Floating motion on the whole photo column */
+        .tp-photo-aura {
+            position: relative;
+            display: inline-block;
+            animation: photoFloat 4.5s ease-in-out infinite;
+        }
+
+
+
+        /* Pulse ripple rings */
+        .tp-photo-aura__pulse,
+        .tp-photo-aura__pulse2,
+        .tp-photo-aura__pulse3 {
+            position: absolute;
+            inset: 0;
+            border-radius: 22px;
+            border: 3px solid rgba(99,139,255,.6);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .tp-photo-aura__pulse  { animation: pulseRing  2.4s cubic-bezier(.2,.6,.3,1) infinite; }
+        .tp-photo-aura__pulse2 { animation: pulseRing2 2.4s cubic-bezier(.2,.6,.3,1) .6s infinite; }
+        .tp-photo-aura__pulse3 { animation: pulseRing3 2.4s cubic-bezier(.2,.6,.3,1) 1.2s infinite; }
+
+        /* Photo itself */
+        .tp-photo-aura__img-wrap {
+            position: relative;
+            z-index: 2;
+            border-radius: 20px;
+            overflow: hidden;
         }
         .tp-hero__photo,
         .tp-hero__photo-placeholder {
@@ -145,27 +208,62 @@ get_header();
             outline: none !important;
             object-fit: cover;
             display: block;
-            box-shadow: 0 8px 40px rgba(36,64,146,.35);
-            animation: none !important;
+            box-shadow: 0 12px 50px rgba(36,64,146,.5), 0 0 0 4px rgba(255,255,255,.08);
         }
-        /* Aggressive overrides to beat any theme/plugin border styles on the hero photo */
+        /* Override any theme/plugin border styles */
         .tp-hero__photo-wrap img,
         .tp-hero__photo-wrap img.tp-hero__photo,
         .tp-wrap .tp-hero__photo-wrap img,
         .tp-wrap .tp-hero img,
         .tp-hero .tp-hero__photo-wrap img {
             border: none !important;
-            border-top: none !important;
-            border-right: none !important;
-            border-bottom: none !important;
-            border-left: none !important;
             outline: none !important;
-            box-shadow: 0 8px 40px rgba(36,64,146,.35) !important;
-            animation: none !important;
             padding: 0 !important;
             background: none !important;
             max-width: none !important;
         }
+
+        /* Shimmer shine sweep */
+        .tp-photo-aura__shine {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            overflow: hidden;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .tp-photo-aura__shine::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -80%;
+            width: 50%;
+            height: 120%;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.22) 50%, transparent 60%);
+            animation: shineSwipe 3.5s ease-in-out infinite 1.5s;
+        }
+
+        /* Floating "Top Teacher" badge */
+        .tp-photo-aura__badge {
+            position: absolute;
+            bottom: -14px;
+            right: -14px;
+            background: #EF3E26;
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            padding: 7px 14px;
+            border-radius: 999px;
+            box-shadow: 0 4px 18px rgba(239,62,38,.55);
+            z-index: 4;
+            white-space: nowrap;
+            animation: badgeBounce 2.8s ease-in-out infinite;
+            border: 2px solid rgba(255,255,255,.35);
+        }
+
+        /* Placeholder */
         .tp-hero__photo-placeholder {
             background: linear-gradient(135deg, #2748b5, #0f1829);
             display: flex;
@@ -173,7 +271,6 @@ get_header();
             justify-content: center;
             font-size: 4rem;
             color: rgba(255,255,255,.35);
-            animation: none !important;
         }
 
         /* Info */
@@ -477,6 +574,8 @@ get_header();
             }
             .tp-hero__photo,
             .tp-hero__photo-placeholder { width: 160px; height: 160px; border-radius: 16px; }
+            .tp-photo-aura__badge { font-size: .62rem; padding: 5px 10px; bottom: -10px; right: -10px; }
+
             .tp-hero__info { padding-bottom: 16px; }
             .tp-hero__tags { justify-content: center; }
 
@@ -521,13 +620,27 @@ get_header();
         <div class="tp-hero__orb3"></div>
         <div class="tp-hero__inner">
             <div class="tp-hero__photo-wrap">
-                <?php if ( $photo_url ) : ?>
-                    <img src="<?php echo esc_url( $photo_url ); ?>"
-                         alt="<?php echo esc_attr( $teacher->post_title ); ?>"
-                         class="tp-hero__photo">
-                <?php else : ?>
-                    <div class="tp-hero__photo-placeholder">👤</div>
-                <?php endif; ?>
+                <div class="tp-photo-aura">
+                    <!-- Pulse rings -->
+                    <div class="tp-photo-aura__pulse"></div>
+                    <div class="tp-photo-aura__pulse2"></div>
+                    <div class="tp-photo-aura__pulse3"></div>
+
+                    <!-- Photo -->
+                    <div class="tp-photo-aura__img-wrap">
+                        <?php if ( $photo_url ) : ?>
+                            <img src="<?php echo esc_url( $photo_url ); ?>"
+                                 alt="<?php echo esc_attr( $teacher->post_title ); ?>"
+                                 class="tp-hero__photo">
+                        <?php else : ?>
+                            <div class="tp-hero__photo-placeholder">👤</div>
+                        <?php endif; ?>
+                        <!-- Shimmer shine -->
+                        <div class="tp-photo-aura__shine"></div>
+                    </div>
+                    <!-- Floating badge -->
+                    <div class="tp-photo-aura__badge">⭐ Top Teacher</div>
+                </div>
             </div>
             <div class="tp-hero__info">
                 <h1 class="tp-hero__name"><?php echo esc_html( $teacher->post_title ); ?></h1>
