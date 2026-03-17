@@ -73,10 +73,6 @@ get_header();
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50%       { transform: translateY(14px) rotate(-5deg); }
         }
-        @keyframes borderGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239,62,38,.15), 0 8px 40px rgba(36,64,146,.22); }
-            50%       { box-shadow: 0 0 0 6px rgba(239,62,38,.08), 0 12px 48px rgba(36,64,146,.30); }
-        }
         @keyframes countUp {
             from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -90,6 +86,9 @@ get_header();
             padding: 64px 0 0;
             position: relative;
             overflow: hidden;
+            border: none !important;
+            border-bottom: none !important;
+            outline: none !important;
         }
         .tp-hero__orb1 {
             position: absolute; top: -100px; right: -100px;
@@ -140,13 +139,32 @@ get_header();
         .tp-hero__photo,
         .tp-hero__photo-placeholder {
             width: 320px;
-            height:400px;
+            height: 400px;
             border-radius: 20px;
-            border: 4px solid rgba(255,255,255,.22);
+            border: none !important;
+            outline: none !important;
             object-fit: cover;
             display: block;
-            animation: borderGlow 4s ease-in-out infinite 1s;
             box-shadow: 0 8px 40px rgba(36,64,146,.35);
+            animation: none !important;
+        }
+        /* Aggressive overrides to beat any theme/plugin border styles on the hero photo */
+        .tp-hero__photo-wrap img,
+        .tp-hero__photo-wrap img.tp-hero__photo,
+        .tp-wrap .tp-hero__photo-wrap img,
+        .tp-wrap .tp-hero img,
+        .tp-hero .tp-hero__photo-wrap img {
+            border: none !important;
+            border-top: none !important;
+            border-right: none !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            outline: none !important;
+            box-shadow: 0 8px 40px rgba(36,64,146,.35) !important;
+            animation: none !important;
+            padding: 0 !important;
+            background: none !important;
+            max-width: none !important;
         }
         .tp-hero__photo-placeholder {
             background: linear-gradient(135deg, #2748b5, #0f1829);
@@ -155,12 +173,13 @@ get_header();
             justify-content: center;
             font-size: 4rem;
             color: rgba(255,255,255,.35);
+            animation: none !important;
         }
 
         /* Info */
         .tp-hero__info { padding-bottom: 36px; flex: 1; }
         .tp-hero__name {
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-size: clamp(4rem, 4vw, 2.4rem);
             font-weight: 800;
             color: #fff;
             line-height: 1.15;
@@ -168,7 +187,7 @@ get_header();
             animation: fadeSlideUp .7s cubic-bezier(.22,1,.36,1) .25s both;
         }
         .tp-hero__designation {
-            font-size: 1rem;
+            font-size: 1.5rem;
             color: rgba(255,255,255,.72);
             font-weight: 500;
             margin-bottom: 18px;
@@ -183,7 +202,7 @@ get_header();
         .tp-hero__tag {
             background: rgba(255,255,255,.11);
             color: rgba(255,255,255,.92);
-            font-size: .73rem;
+            font-size: 1.3rem;
             font-weight: 700;
             padding: 5px 16px;
             border-radius: 999px;
@@ -199,12 +218,15 @@ get_header();
         .tp-hero__tag:nth-child(4) { animation-delay: .8s; }
 
         .tp-hero__wave {
-            height: 48px;
+            height: 60px;
             background: #f0f4fb;
             border-radius: 50% 50% 0 0 / 100% 100% 0 0;
             margin-top: 36px;
+            margin-bottom: -2px;
             position: relative;
             z-index: 2;
+            border: none !important;
+            outline: none !important;
         }
 
         /* ══════════════════════════════════════
@@ -278,11 +300,15 @@ get_header();
             border-radius: 12px;
             display: flex; align-items: center;
             justify-content: center;
-            font-size: 1.35rem; flex-shrink: 0;
+            font-size: 1.5rem; flex-shrink: 0;
+        }
+        .tp-card__icon img {
+            width: 25px !important;
+            height: 25px !important;
         }
         .tp-card__title {
-            font-size: 1.05rem; font-weight: 800;
-            color: #1e293b; position: relative; padding-left: 14px;
+            font-size: 2rem; font-weight: 800;
+            color: #244092; position: relative; padding-left: 14px;
         }
         .tp-card__title::before {
             content: '';
@@ -294,11 +320,11 @@ get_header();
         }
 
         /* ── Bio ── */
-        .tp-bio { font-size: .95rem; color: #475569; line-height: 1.9; }
+        .tp-bio { font-size: 1.4rem; color: #475569; line-height: 1.9; }
         .tp-bio p { margin-bottom: 12px; }
         .tp-bio p:last-child { margin-bottom: 0; }
 
-        /* ── Courses grid (big card design) ── */
+        /* ── Courses grid ── */
         .tp-courses {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -361,9 +387,7 @@ get_header();
             display: flex; align-items: center; gap: 8px;
             color: #244092; font-weight: 700; font-size: 13px;
         }
-        .tp-course-card__meta-icon {
-            width: 36px; height: 35px; flex-shrink: 0;
-        }
+        .tp-course-card__meta-icon { width: 36px; height: 35px; flex-shrink: 0; }
         .tp-course-card__meta-label { font-size: 13px; font-weight: 700; color: #244092; }
         .tp-course-card__title {
             font-size: 1.1rem; font-weight: 700;
@@ -393,18 +417,22 @@ get_header();
         }
         .tp-info-row:hover { background: #f8fafc; }
         .tp-info-icon {
-            width: 38px; height: 38px;
+            width: 40px !important; height: 40px !important;
             background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
             border-radius: 10px;
             display: flex; align-items: center;
             justify-content: center;
             font-size: 1rem; flex-shrink: 0;
         }
+        .tp-info-icon img {
+            width: 20px !important;
+            height: 20px !important;
+        }
         .tp-info-label {
-            font-size: .68rem; color: #94a3b8;
+            font-size: 1rem; color: #94a3b8;
             font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
         }
-        .tp-info-value { font-size: .9rem; color: #334155; font-weight: 600; margin-top: 2px; }
+        .tp-info-value { font-size: 1.3rem; color: #334155; font-weight: 600; margin-top: 2px; }
 
         /* ── Empty ── */
         .tp-empty { text-align: center; padding: 40px 24px; color: #94a3b8; font-size: .9rem; }
@@ -518,13 +546,11 @@ get_header();
         <div class="tp-hero__wave"></div>
     </div>
 
-
     <!-- ── Body ── -->
     <div class="tp-body">
 
         <!-- Left Column -->
         <div class="tp-left">
-
             <?php if ( $bio ) : ?>
             <div class="tp-card tp-reveal">
                 <div class="tp-card__header">
@@ -534,9 +560,6 @@ get_header();
                 <div class="tp-bio"><?php echo wp_kses_post( wpautop( $bio ) ); ?></div>
             </div>
             <?php endif; ?>
-
-
-
         </div>
 
         <!-- Sidebar -->
@@ -572,7 +595,6 @@ get_header();
                         </div>
                     </div>
                     <?php endif; ?>
-
                 </div>
             </div>
         </div>

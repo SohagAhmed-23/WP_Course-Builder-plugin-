@@ -115,9 +115,12 @@ get_header();
 	border-radius: 18px;
 	overflow: hidden;
 	position: relative;
-	border: 2px solid transparent;
+	border-left: 0px;;
+	border-right: 3px solid #EF3E26;
+	border-bottom: 3px solid #EF3E26;
+	/* border: 2px solid transparent;
 	border-right-color: #EF3E26;
-	border-bottom-color: #EF3E26;
+	border-bottom-color: #EF3E26; */
 box-shadow:rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, #ffffff 0px 30px 60px -30px, #244092 0px -94px 44px 45px inset;
 	display: flex;
 	flex-direction: column;
