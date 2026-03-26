@@ -69,15 +69,17 @@ final class Plugin {
         global $post;
         if ( is_singular( 'cb_course' ) ) {
             $plugin_tpl = CB_PLUGIN_DIR . 'templates/single-cb_course.php';
-            if ( file_exists( $plugin_tpl ) ) {
-                return $plugin_tpl;
-            }
+            if ( file_exists( $plugin_tpl ) ) return $plugin_tpl;
+        }
+        if ( is_singular( 'cb_teacher' ) ) {
+            $plugin_tpl = CB_PLUGIN_DIR . 'templates/single-cb_teacher.php';
+            if ( file_exists( $plugin_tpl ) ) return $plugin_tpl;
         }
         return $template;
     }
 
     public function enqueue_frontend_assets(): void {
-        if ( ! is_singular( 'cb_course' ) ) return;
+        if ( ! is_singular( 'cb_course' ) && ! is_singular( 'cb_teacher' ) ) return;
         wp_enqueue_style(
             'cb-course',
             CB_PLUGIN_URL . 'assets/css/course.css',
@@ -87,7 +89,7 @@ final class Plugin {
         // Google Fonts
         wp_enqueue_style(
             'cb-google-fonts',
-            'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
+            'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
             [],
             null
         );

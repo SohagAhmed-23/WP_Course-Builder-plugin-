@@ -8,6 +8,41 @@ $total_cats     = is_array( $categories ) ? count( $categories ) : 0;
 ?>
 <div class="cb-wrap">
 
+    <!-- Version / Changelog Banner -->
+    <?php
+    $last_seen_version = get_option( 'cb_last_seen_version', '0' );
+    $is_new_version    = version_compare( CB_VERSION, $last_seen_version, '>' );
+    ?>
+    <?php if ( $is_new_version ) : ?>
+    <div class="cb-version-banner" id="cbVersionBanner">
+        <div class="cb-version-banner__inner">
+            <div class="cb-version-banner__icon">🎉</div>
+            <div class="cb-version-banner__content">
+                <strong>Course Builder updated to v<?php echo CB_VERSION; ?></strong>
+                <ul class="cb-version-banner__log">
+                    <li>✅ <strong>Data now safe on update</strong> — courses, teachers &amp; departments are preserved when you reinstall or update the plugin</li>
+                    <li>✅ <strong>Video field fixed</strong> — only one YouTube/Vimeo URL field on create/edit course (ghost field removed)</li>
+                    <li>✅ <strong>Course Explainer position fixed</strong> — now always appears between Enrol card and Demo Registration in sidebar</li>
+                    <li>✅ <strong>Preview button</strong> — appears instantly after saving a new course, no page reload needed</li>
+                    <li>✅ <strong>New Settings page</strong> — control whether data is deleted on plugin uninstall (Course Builder → Settings)</li>
+                    <li>✅ <strong>Design matched to reference</strong> — Poppins font, emoji icon headers, red ▸ bullets, inset shadow cards, scroll reveal</li>
+                </ul>
+            </div>
+            <button class="cb-version-banner__close" onclick="cbDismissBanner()" title="Dismiss">✕</button>
+        </div>
+    </div>
+    <script>
+    function cbDismissBanner() {
+        document.getElementById('cbVersionBanner').style.display = 'none';
+        fetch(ajaxurl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=cb_dismiss_version_banner&nonce=<?php echo wp_create_nonce("cb_dismiss_banner"); ?>&version=<?php echo CB_VERSION; ?>'
+        });
+    }
+    </script>
+    <?php endif; ?>
+
     <!-- Page Header -->
     <div class="cb-page-header cb-page-header--gradient">
         <div class="cb-page-header__left">
@@ -114,6 +149,8 @@ $total_cats     = is_array( $categories ) ? count( $categories ) : 0;
             <span class="cb-pagination__info" id="cb-pagination-info"></span>
             <div class="cb-pagination__controls" id="cb-pagination-controls"></div>
         </div>
+    </div>
+        <div id="cb-debug-out" style="white-space:pre-wrap;color:#94a3b8">Click Run Test to fire cb_get_courses and see the raw response...</div>
     </div>
 
 </div>

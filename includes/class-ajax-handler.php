@@ -24,6 +24,7 @@ class Ajax_Handler {
             'cb_delete_teacher',
             // Misc
             'cb_get_wc_products',
+            'cb_refresh_nonce',
         ];
 
         foreach ( $actions as $action ) {
@@ -32,14 +33,40 @@ class Ajax_Handler {
     }
 
     public function dispatch(): void {
-        $action = sanitize_key( $_REQUEST['action'] ?? '' );
-        $method = 'handle_' . str_replace( 'cb_', '', $action );
+        // Turn any PHP warnings/notices into catchable errors so they
+        // don't corrupt the JSON response and cause an endless spinner.
+        set_error_handler( function( $errno, $errstr ) {
+            throw new \ErrorException( $errstr, $errno );
+        }, E_ALL & ~E_DEPRECATED & ~E_STRICT );
 
-        if ( ! method_exists( $this, $method ) ) {
-            wp_send_json_error( [ 'message' => 'Unknown action.' ], 400 );
+        try {
+            $action = sanitize_key( $_REQUEST['action'] ?? '' );
+            $method = 'handle_' . str_replace( 'cb_', '', $action );
+
+            if ( ! method_exists( $this, $method ) ) {
+                wp_send_json_error( [ 'message' => 'Unknown action: ' . $action ], 400 );
+            }
+
+            $this->$method();
+
+        } catch ( \Throwable $e ) {
+            wp_send_json_error( [
+                'message' => 'Server error: ' . $e->getMessage(),
+                'file'    => basename( $e->getFile() ),
+                'line'    => $e->getLine(),
+            ], 500 );
+        } finally {
+            restore_error_handler();
         }
+    }
 
-        $this->$method();
+    // ── Nonce refresh (called when nonce expires) ────────────────────────────
+
+    private function handle_refresh_nonce(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+        wp_send_json_success( [ 'nonce' => wp_create_nonce( 'cb_admin_nonce' ) ] );
     }
 
     // ── Security helper ───────────────────────────────────────────────────────
@@ -79,6 +106,7 @@ class Ajax_Handler {
             'age_min'     => get_post_meta( $post->ID, '_cb_age_min', true ),
             'duration'    => get_post_meta( $post->ID, '_cb_duration_months', true ),
             'live_classes'=> get_post_meta( $post->ID, '_cb_live_classes', true ),
+            'permalink'   => get_permalink( $post->ID ),
             ];
         }
 
@@ -113,6 +141,8 @@ class Ajax_Handler {
             'youtube_url'         => get_post_meta( $post->ID, '_cb_youtube_url', true ),
             'duration_months'     => get_post_meta( $post->ID, '_cb_duration_months', true ),
             'live_classes'        => get_post_meta( $post->ID, '_cb_live_classes', true ),
+            'featured_image_id'   => (int) get_post_thumbnail_id( $post->ID ),
+            'featured_image_url'  => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
         ] );
     }
 
@@ -130,6 +160,7 @@ class Ajax_Handler {
             'youtube_url'         => esc_url_raw( $_POST['youtube_url'] ?? '' ),
             'duration_months'     => absint( $_POST['duration_months'] ?? 0 ),
             'live_classes'        => absint( $_POST['live_classes'] ?? 0 ),
+            'featured_image_id'   => intval( $_POST['featured_image_id'] ?? 0 ),
             'learning_objectives' => $this->sanitize_array( $_POST['learning_objectives'] ?? [] ),
             'programme_overview'  => $this->sanitize_array( $_POST['programme_overview'] ?? [] ),
             'course_content'      => $this->sanitize_nested( $_POST['course_content'] ?? [] ),
@@ -157,7 +188,9 @@ class Ajax_Handler {
         update_post_meta( $post_id, '_cb_wc_product_id', $data['wc_product_id'] );
 
         wp_send_json_success( [
-            'message' => $data['id'] ? 'Course updated.' : 'Course created.',
+            'message'   => $data['id'] ? 'Course updated.' : 'Course created.',
+            'id'        => $post_id,
+            'permalink' => get_permalink( $post_id ),
             'id'      => $post_id,
         ] );
     }

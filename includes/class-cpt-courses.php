@@ -109,12 +109,14 @@ class CPT_Courses {
         }
 
         // Meta fields
-        $meta_keys = [
-            'subtitle', 'wc_product_id', 'teacher_id', 'age_min', 'duration_months', 'live_classes', 'video_url', 'youtube_url',
-        ];
+        $url_keys  = [ 'video_url', 'youtube_url' ];
+        $meta_keys = [ 'subtitle', 'wc_product_id', 'teacher_id', 'age_min', 'duration_months', 'live_classes', 'video_url', 'youtube_url' ];
         foreach ( $meta_keys as $key ) {
             if ( isset( $data[ $key ] ) ) {
-                update_post_meta( $post_id, '_cb_' . $key, sanitize_text_field( $data[ $key ] ) );
+                $val = in_array( $key, $url_keys, true )
+                    ? esc_url_raw( $data[ $key ] )
+                    : sanitize_text_field( $data[ $key ] );
+                update_post_meta( $post_id, '_cb_' . $key, $val );
             }
         }
 
@@ -129,6 +131,17 @@ class CPT_Courses {
         // Category taxonomy
         if ( ! empty( $data['category_id'] ) ) {
             wp_set_post_terms( $post_id, [ absint( $data['category_id'] ) ], 'cb_category' );
+        }
+
+        // Featured image — only update if explicitly provided (> 0)
+        // Never wipe existing thumbnail just because field was empty
+        if ( ! empty( $data['featured_image_id'] ) && $data['featured_image_id'] > 0 ) {
+            set_post_thumbnail( $post_id, (int) $data['featured_image_id'] );
+            update_post_meta( $post_id, '_cb_photo_id', (int) $data['featured_image_id'] );
+        } elseif ( isset( $data['featured_image_id'] ) && $data['featured_image_id'] === -1 ) {
+            // -1 means explicitly removed by user
+            delete_post_thumbnail( $post_id );
+            delete_post_meta( $post_id, '_cb_photo_id' );
         }
 
         return $post_id;

@@ -152,7 +152,10 @@ $categories = get_terms( [ 'taxonomy' => 'cb_category', 'hide_empty' => false ] 
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <strong class="cb-teacher-name"><?php echo esc_html( $teacher['name'] ); ?></strong>
+                                        <?php $t_permalink = get_permalink( $teacher['id'] ); ?>
+                                        <a href="<?php echo esc_url( $t_permalink ); ?>" target="_blank" class="cb-teacher-name-link">
+                                            <strong class="cb-teacher-name"><?php echo esc_html( $teacher['name'] ); ?></strong>
+                                        </a>
                                         <?php if ( ! empty( $teacher['description'] ) ) : ?>
                                             <p class="cb-teacher-bio"><?php echo esc_html( wp_trim_words( $teacher['description'], 14, '…' ) ); ?></p>
                                         <?php endif; ?>
@@ -175,6 +178,10 @@ $categories = get_terms( [ 'taxonomy' => 'cb_category', 'hide_empty' => false ] 
                                     </td>
                                     <td>
                                         <div class="cb-action-btns">
+                                            <a href="<?php echo esc_url( get_permalink( $teacher['id'] ) ); ?>" target="_blank"
+                                                class="cb-action-btn cb-action-btn--preview" title="View Profile">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                            </a>
                                             <button type="button" class="cb-action-btn cb-action-btn--edit"
                                                 data-id="<?php echo esc_attr( $teacher['id'] ); ?>" title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>

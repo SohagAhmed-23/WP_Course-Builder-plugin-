@@ -1088,3 +1088,114 @@
 }
 
 .cb-youtube-input__field::placeholder { color: var(--cb-text-faint); }
+
+
+/* ── Course Preview Button ─────────────────────────────────────── */
+.cb-preview-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 16px;
+    background: var(--cb-primary-faint);
+    border: 1.5px solid var(--cb-primary);
+    border-radius: 8px;
+    color: var(--cb-primary);
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, box-shadow .15s, transform .15s;
+    line-height: 1;
+}
+.cb-preview-btn:hover {
+    background: var(--cb-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(36,64,146,.25);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+.cb-preview-btn svg {
+    width: 15px; height: 15px; flex-shrink: 0;
+}
+
+/* Preview action button */
+.cb-action-btn--preview { color: var(--cb-teal, #0d9488); }
+.cb-action-btn--preview:hover { background: rgba(13,148,136,0.12); color: var(--cb-teal, #0d9488); }
+
+/* ── Version / Changelog Banner ──────────────────────────────────────────── */
+.cb-version-banner {
+    background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);
+    border: 1.5px solid #c7d2fe;
+    border-left: 5px solid var(--cb-primary);
+    border-radius: 12px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    animation: cbBannerIn .4s ease;
+}
+@keyframes cbBannerIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.cb-version-banner__inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+}
+.cb-version-banner__icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.cb-version-banner__content {
+    flex: 1;
+}
+.cb-version-banner__content strong {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--cb-primary);
+    margin-bottom: 10px;
+}
+.cb-version-banner__log {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.cb-version-banner__log li {
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+}
+.cb-version-banner__log li strong {
+    display: inline;
+    font-size: inherit;
+    color: #1e293b;
+    margin-bottom: 0;
+}
+.cb-version-banner__close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background .15s, color .15s;
+    line-height: 1;
+}
+.cb-version-banner__close:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* Teacher name as link */
+.cb-teacher-name-link { text-decoration: none; }
+.cb-teacher-name-link:hover .cb-teacher-name { color: var(--cb-primary); text-decoration: underline; }

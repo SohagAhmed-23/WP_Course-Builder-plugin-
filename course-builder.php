@@ -3,7 +3,7 @@
  * Plugin Name:       Course Builder
  * Plugin URI:        https://example.com/course-builder
  * Description:       A modern, modular course management system for WordPress with full admin UI, AJAX-powered CRUD, WooCommerce integration, and a clean dashboard.
- * Version:           1.0.0
+ * Version:           1.4.3
  * Author:            Course Builder Team
  * Author URI:        https://example.com
  * License:           GPL v2 or later
@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // ── Plugin constants ──────────────────────────────────────────────────────────
-define( 'CB_VERSION',     '1.0.1' );
+define( 'CB_VERSION',     '1.4.3' );
 define( 'CB_PLUGIN_FILE', __FILE__ );
 define( 'CB_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'CB_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
@@ -56,6 +56,12 @@ function cb_activate(): void {
     CB\Core\Taxonomy_Category::register();
     flush_rewrite_rules();
     cb_install_tables();
+
+    // Store current version so upgrade checks can compare.
+    // Never delete user data here — activation fires on both fresh
+    // installs AND plugin updates/re-uploads.
+    update_option( 'cb_version',    CB_VERSION );
+    update_option( 'cb_db_version', '1.0' );
 }
 
 function cb_deactivate(): void {
@@ -85,4 +91,14 @@ function cb_install_tables(): void {
 add_action( 'plugins_loaded', function (): void {
     require_once CB_PLUGIN_DIR . 'includes/class-plugin.php';
     CB\Core\Plugin::instance()->init();
+
+    // After a reinstall or version change, flush rewrite rules once so
+    // CPT slugs (/course/xxx) resolve correctly without manual Permalinks save.
+    $stored = get_option( 'cb_version', '0' );
+    if ( version_compare( CB_VERSION, $stored, '>' ) ) {
+        update_option( 'cb_version', CB_VERSION );
+        add_action( 'init', function() {
+            flush_rewrite_rules( false );
+        }, 99 );
+    }
 } );

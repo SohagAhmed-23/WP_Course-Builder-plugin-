@@ -6,7 +6,15 @@
 (function ($) {
     'use strict';
 
-    const { ajax_url, nonce } = CB_Admin;
+    const { ajax_url } = CB_Admin;
+    let nonce = CB_Admin.nonce; // mutable — refreshed on 403
+
+    // Auto-refresh nonce if it expires (e.g. after reinstall / long session)
+    function refreshNonce() {
+        return $.post(ajax_url, { action: 'cb_refresh_nonce' }).done(res => {
+            if (res.success && res.data.nonce) { nonce = res.data.nonce; }
+        });
+    }
 
     // ── Toast Notification System ─────────────────────────────────────────
     const Toast = {
@@ -37,7 +45,22 @@
 
     // ── AJAX Helper ───────────────────────────────────────────────────────
     function ajax(action, data = {}) {
-        return $.post(ajax_url, { action, nonce, ...data });
+        const deferred = $.Deferred();
+        $.post(ajax_url, { action, nonce, ...data })
+            .done(res => {
+                // Nonce expired — refresh and retry once
+                if (!res.success && res.data && res.data.message && res.data.message.indexOf('Nonce') !== -1) {
+                    refreshNonce().done(() => {
+                        $.post(ajax_url, { action, nonce, ...data })
+                            .done(r => deferred.resolve(r))
+                            .fail(e => deferred.reject(e));
+                    });
+                } else {
+                    deferred.resolve(res);
+                }
+            })
+            .fail(e => deferred.reject(e));
+        return deferred.promise();
     }
 
     // ── Repeater Factory ──────────────────────────────────────────────────
@@ -144,22 +167,27 @@
         let deleteId    = null;
 
         function renderRow(c) {
+            const age      = c.age_min      ? c.age_min + '+'      : '—';
+            const duration = c.duration     ? c.duration + ' mo'   : '—';
+            const live     = c.live_classes ? c.live_classes        : '—';
             return `
                 <tr data-id="${c.id}">
                     <td><input type="checkbox" class="cb-checkbox cb-row-check" value="${c.id}"></td>
                     <td>
                         <div class="cb-course-title">
                             <strong>${escHtml(c.title)}</strong>
-                            <span class="cb-course-subtitle">${escHtml(c.subtitle || '')}</span>
+                            ${c.subtitle ? `<span class="cb-course-subtitle">${escHtml(c.subtitle)}</span>` : ''}
                         </div>
                     </td>
-                    <td>${escHtml(c.subtitle || '—')}</td>
-                    <td>${c.category ? `<span class="cb-tag">${escHtml(c.category)}</span>` : '—'}</td>
+                    <td>${c.category ? `<span class="cb-tag">${escHtml(c.category)}</span>` : '<span class="cb-muted">—</span>'}</td>
                     <td>${escHtml(c.teacher || '—')}</td>
+                    <td class="cb-muted">${age}</td>
+                    <td class="cb-muted">${duration}</td>
+                    <td class="cb-muted">${live}</td>
                     <td class="cb-muted">${escHtml(c.date)}</td>
                     <td>
                         <div class="cb-action-btns">
-                            <a href="${coursePermalink(c.id)}" target="_blank" class="cb-action-btn" title="Preview" style="color:var(--cb-teal)">
+                            <a href="${c.permalink || '#'}" target="_blank" class="cb-action-btn cb-action-btn--preview" title="Preview">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                             </a>
                             <a href="admin.php?page=course-builder-add&id=${c.id}" class="cb-action-btn cb-action-btn--edit" title="Edit">
@@ -217,7 +245,12 @@
                 page: currentPage, per_page: perPage,
                 search: searchVal, category_id: catId,
             }).done(res => {
-                if (!res.success) { Toast.show('Failed to load courses.', 'error'); return; }
+                if (!res.success) {
+                    const msg = res.data?.message || 'Failed to load courses.';
+                    $tbody.html('<tr><td colspan="9" class="cb-empty" style="color:#ef3e26">⚠ ' + msg + ' — <a href="javascript:location.reload()">Reload page</a></td></tr>');
+                    Toast.show(msg, 'error');
+                    return;
+                }
                 const { courses, total, total_pages } = res.data;
 
                 if (courses.length === 0) {
@@ -227,6 +260,9 @@
                 }
                 $tbody.html(courses.map(renderRow).join(''));
                 renderPagination(total, total_pages);
+            }).fail(function(xhr) {
+                const errText = xhr.responseText ? xhr.responseText.substring(0, 200) : 'Unknown error';
+                $tbody.html('<tr><td colspan="9" class="cb-empty" style="color:#ef3e26">⚠ AJAX error — <a href="javascript:location.reload()">Reload the page</a> to try again.<br><small style="color:#94a3b8">' + errText + '</small></td></tr>');
             });
         }
 
@@ -286,6 +322,7 @@
         });
 
         loadCourses();
+
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -323,6 +360,9 @@
                 $('#cb-teacher').val(d.teacher_id || 0);
 
                 // Repeaters
+                (d.programme_overview || []).forEach(v => {
+                    Repeater.addSimple($('#cb-overview-list'), 'programme_overview[]', v, 'e.g. Students will explore…');
+                });
                 (d.learning_objectives || []).forEach(v => {
                     Repeater.addSimple($('#cb-objectives-list'), 'learning_objectives[]', v, 'e.g. Understand core concepts');
                 });
@@ -335,6 +375,13 @@
                 if (d.age_min) $('#cb-age-min').val(d.age_min);
                 if (d.duration_months) $('#cb-duration').val(d.duration_months);
                 if (d.live_classes)    $('#cb-live-classes').val(d.live_classes);
+                // Featured image
+                if (d.featured_image_id) {
+                    $('#cb-featured-image-id').val(d.featured_image_id);
+                    $('#cb-featured-image-img').attr('src', d.featured_image_url);
+                    $('#cb-featured-image-preview').show();
+                    $('#cb-featured-image-remove').show();
+                }
             });
         } else {
             loadProducts();
@@ -347,6 +394,7 @@
 
 
         // Add buttons
+        $('#cb-add-overview').on('click', () => Repeater.addSimple($('#cb-overview-list'), 'programme_overview[]', '', 'e.g. Students will explore…'));
         $('#cb-add-objective').on('click', () =>
             Repeater.addSimple($('#cb-objectives-list'), 'learning_objectives[]', '', 'e.g. Master advanced techniques')
         );
@@ -398,14 +446,21 @@
                 wc_product_id:       $('#cb-wc-product').val(),
                 age_min:             $('#cb-age-min').val(),
                 video_url:           $('#cb-video-url').val(),
-                youtube_url:         $('#cb-youtube-url').val(),
                 duration_months:     $('#cb-duration').val(),
                 live_classes:        $('#cb-live-classes').val(),
+                featured_image_id:   parseInt($('#cb-featured-image-id').val()) || 0,
             };
 
             // Append as array data
+            const overview = [];
+            $('[name="programme_overview[]"]').each(function () {
+                const v = $(this).val().trim();
+                if (v) overview.push(v);
+            });
+
             const params = $.param(postData)
                 + '&' + $.param({ learning_objectives: objectives })
+                + '&' + $.param({ programme_overview: overview })
                 + '&' + $.param({ additional_support: support })
                 + '&' + $.param({ course_content: collectUnits() });
 
@@ -416,10 +471,27 @@
                     $status.removeClass('cb-form-status--error').addClass('cb-form-status--success')
                         .html('✓ ' + res.data.message).show();
                     Toast.show(res.data.message, 'success');
+                    // Show / update preview button immediately after save
+                    if (res.data.id && res.data.permalink) {
+                        // Sidebar preview wrap
+                        const $pw = $('#cb-preview-wrap');
+                        const $pb = $('#cb-preview-btn');
+                        if ($pb.length) { $pb.attr('href', res.data.permalink); $pw.show(); }
+                        // Header preview button — inject for new courses, update for edits
+                        if (!$('#cb-preview-btn-header').length) {
+                            const $back = $('.cb-page-header .cb-btn--ghost').first();
+                            $('<a target="_blank" id="cb-preview-btn-header" class="cb-preview-btn"></a>')
+                                .attr('href', res.data.permalink)
+                                .html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Preview')
+                                .insertBefore($back);
+                        } else {
+                            $('#cb-preview-btn-header').attr('href', res.data.permalink);
+                        }
+                    }
                     if (!editId) {
                         setTimeout(() => {
                             window.location.href = 'admin.php?page=course-builder-add&id=' + res.data.id;
-                        }, 1000);
+                        }, 1200);
                     }
                 } else {
                     $status.removeClass('cb-form-status--success').addClass('cb-form-status--error')
@@ -427,6 +499,36 @@
                     Toast.show(res.data.message || 'Save failed.', 'error');
                 }
             });
+        });
+    }
+
+    // ── Featured Image Media Uploader ────────────────────────────────────────
+    if ($('#cb-featured-image-btn').length) {
+        let featuredFrame;
+
+        $('#cb-featured-image-btn').on('click', function () {
+            if (featuredFrame) { featuredFrame.open(); return; }
+            featuredFrame = wp.media({
+                title: 'Select Featured Image',
+                button: { text: 'Set Featured Image' },
+                multiple: false,
+                library: { type: 'image' }
+            });
+            featuredFrame.on('select', function () {
+                const attachment = featuredFrame.state().get('selection').first().toJSON();
+                $('#cb-featured-image-id').val(attachment.id);
+                $('#cb-featured-image-img').attr('src', attachment.url);
+                $('#cb-featured-image-preview').show();
+                $('#cb-featured-image-remove').show();
+            });
+            featuredFrame.open();
+        });
+
+        $('#cb-featured-image-remove').on('click', function () {
+            $('#cb-featured-image-id').val('-1'); // -1 = explicitly removed
+            $('#cb-featured-image-img').attr('src', '');
+            $('#cb-featured-image-preview').hide();
+            $(this).hide();
         });
     }
 

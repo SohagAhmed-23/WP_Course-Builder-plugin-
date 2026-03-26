@@ -23,10 +23,21 @@ $teachers   = \CB\Core\CPT_Teachers::get_formatted();
                 <p><?php _e( 'Fill in the details below to create a rich course experience.', 'course-builder' ); ?></p>
             </div>
         </div>
-        <a href="<?php echo admin_url( 'admin.php?page=course-builder' ); ?>" class="cb-btn cb-btn--ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            <?php _e( 'Back to Courses', 'course-builder' ); ?>
-        </a>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <?php if ( $is_edit ) : ?>
+            <a href="<?php echo esc_url( get_permalink( $edit_id ) ); ?>"
+               target="_blank"
+               id="cb-preview-btn-header"
+               class="cb-preview-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <?php _e( 'Preview', 'course-builder' ); ?>
+            </a>
+            <?php endif; ?>
+            <a href="<?php echo admin_url( 'admin.php?page=course-builder' ); ?>" class="cb-btn cb-btn--ghost">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <?php _e( 'Back to Courses', 'course-builder' ); ?>
+            </a>
+        </div>
     </div>
 
     <form id="cb-course-form" data-edit-id="<?php echo esc_attr( $edit_id ); ?>">
@@ -61,20 +72,7 @@ $teachers   = \CB\Core\CPT_Teachers::get_formatted();
                             <input type="text" id="cb-subtitle" name="subtitle" class="cb-input" placeholder="A short tagline that sells the course">
                         </div>
 
-                        <div class="cb-field" style="margin-bottom:0">
-                            <label class="cb-label" for="cb-youtube-url">
-                                <svg class="cb-label-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
-                                <?php _e( 'Course Explainer Video', 'course-builder' ); ?>
-                            </label>
-                            <div class="cb-youtube-input">
-                                <span class="cb-youtube-input__prefix">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EF3E26"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff"/></svg>
-                                </span>
-                                <input type="url" id="cb-youtube-url" name="youtube_url" class="cb-input cb-youtube-input__field"
-                                    placeholder="https://www.youtube.com/watch?v=…">
-                            </div>
-                            <p class="cb-hint"><?php _e( 'Paste a YouTube link to preview this course. Leave blank if not applicable.', 'course-builder' ); ?></p>
-                        </div>
+
                     </div>
                 </div>
 
@@ -177,15 +175,53 @@ $teachers   = \CB\Core\CPT_Teachers::get_formatted();
                                 <?php _e( 'Saving…', 'course-builder' ); ?>
                             </span>
                         </button>
+                        <!-- Preview button — always rendered, URL set via JS after save -->
+                        <div id="cb-preview-wrap" style="<?php echo $is_edit ? '' : 'display:none;'; ?>margin-top:10px">
+                            <a href="<?php echo $is_edit ? esc_url( get_permalink( $edit_id ) ) : '#'; ?>"
+                               target="_blank"
+                               id="cb-preview-btn"
+                               class="cb-preview-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                <?php _e( 'Preview Course Page', 'course-builder' ); ?>
+                            </a>
+                        </div>
                         <?php if ( $is_edit ) : ?>
-                        <a href="<?php echo get_permalink( $edit_id ); ?>" target="_blank" class="cb-btn cb-btn--ghost cb-btn--full" style="margin-top:10px">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            <?php _e( 'Preview Course Page', 'course-builder' ); ?>
-                        </a>
                         <a href="<?php echo admin_url( 'admin.php?page=course-builder-add' ); ?>" class="cb-btn cb-btn--ghost cb-btn--full" style="margin-top:8px">
                             <?php _e( '+ Add Another Course', 'course-builder' ); ?>
                         </a>
                         <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="cb-card">
+                    <div class="cb-card__header">
+                        <div class="cb-card__header-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div>
+                            <h2><?php _e( 'Featured Image', 'course-builder' ); ?></h2>
+                            <p><?php _e( 'Shown on the course card and teacher page.', 'course-builder' ); ?></p>
+                        </div>
+                    </div>
+                    <div class="cb-card__body">
+                        <input type="hidden" id="cb-featured-image-id" name="featured_image_id" value="<?php echo $is_edit ? esc_attr( get_post_thumbnail_id( $edit_id ) ) : ''; ?>">
+                        <div id="cb-featured-image-preview" style="margin-bottom:12px;<?php echo ( $is_edit && get_post_thumbnail_id( $edit_id ) ) ? '' : 'display:none;'; ?>">
+                            <?php if ( $is_edit && get_post_thumbnail_id( $edit_id ) ) : ?>
+                            <img id="cb-featured-image-img"
+                                 src="<?php echo esc_url( get_the_post_thumbnail_url( $edit_id, 'medium' ) ); ?>"
+                                 style="width:100%;border-radius:8px;display:block;object-fit:cover;max-height:180px;">
+                            <?php else : ?>
+                            <img id="cb-featured-image-img" src="" style="width:100%;border-radius:8px;display:block;object-fit:cover;max-height:180px;">
+                            <?php endif; ?>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" id="cb-featured-image-btn" class="cb-btn cb-btn--outline cb-btn--sm cb-btn--full">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <?php _e( 'Set Featured Image', 'course-builder' ); ?>
+                            </button>
+                            <button type="button" id="cb-featured-image-remove" class="cb-btn cb-btn--ghost cb-btn--sm" style="<?php echo ( $is_edit && get_post_thumbnail_id( $edit_id ) ) ? '' : 'display:none;'; ?>">✕</button>
+                        </div>
                     </div>
                 </div>
 
