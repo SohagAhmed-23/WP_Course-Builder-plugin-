@@ -9,9 +9,61 @@
 
 ## 📦 Plugin Overview
 
-Course Builder is a custom WordPress plugin that provides a full course management system with its own admin UI, AJAX-powered CRUD, WooCommerce integration, and beautiful frontend templates — independent of Tutor LMS.
+Course Builder is a custom WordPress plugin that provides a full course management system with its own admin UI, AJAX-powered CRUD, WooCommerce integration, and beautiful frontend templates.
 
 ---
+
+## ✨ Features
+
+- **Full Course Management System**
+  - Create, edit, and delete courses with a custom admin interface
+  - Structured course data with advanced meta fields
+
+- **WooCommerce Integration**
+  - Link each course to a WooCommerce product
+  - Sell courses directly through WooCommerce checkout
+
+- **Teacher Management**
+  - Create dedicated teacher profiles
+  - Assign teachers to courses
+  - Public teacher pages with clean URLs
+
+- **Department / Category System**
+  - Custom taxonomy (cb_category) for departments
+  - Subcategory support via custom DB table
+  - Category-based course filtering
+
+- **AJAX-Powered Admin Panel**
+  - Fast CRUD operations without page reloads
+  - Secure endpoints with nonce validation
+  - Pagination, filters, and live updates
+
+- **Modern Frontend Templates**
+  - Dedicated course page (/course/{slug})
+  - Teacher profile page (/teacher/{slug})
+  - Fully styled and responsive UI
+
+- **Shortcode System**
+  - Built-in and extendable shortcodes
+  - Course sliders, category carousels, and teacher listings
+  - Dynamic category-based course pages
+
+- **SEO-Friendly URLs**
+  - Clean permalink structure for courses and teachers
+  - Slug-based routing system
+
+- **Media & Featured Image Support**
+  - Native WordPress media uploader integration
+  - Dual storage (_thumbnail_id + _cb_photo_id) for reliability
+
+- **Data Safety & Control**
+  - Data preserved on updates by default
+  - Optional full cleanup on uninstall
+
+- **Developer-Friendly Architecture**
+  - Modular OOP structure
+  - Separate classes for CPTs, AJAX, shortcodes, and admin
+  - Easy to extend and customize
 
 ## 🚀 Installation
 
